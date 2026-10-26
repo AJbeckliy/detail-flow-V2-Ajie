@@ -22,7 +22,7 @@ same card template. Agent-selected geometry controls each page.
 Root fields:
 
 - `title`: review-board title, not product copy.
-- `aspect_ratio`: confirmed default for these pages, fixed `9:16` for final pages.
+- `aspect_ratio`: confirmed default for these pages; use `9:16` only when the user has not specified another ratio.
 - `design_width`: coordinate/font design width, normally 720.
 - `pages`: normal ordered blueprint entries. A page may override `aspect_ratio`.
 

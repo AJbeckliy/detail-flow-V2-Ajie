@@ -72,6 +72,15 @@ def resolve_manifest(manifest, base_dir):
         result['approved_plan']['path']=absolute(result['approved_plan']['path'])
     if isinstance(result.get('repair_context'),dict) and result['repair_context'].get('source_run'):
         result['repair_context']['source_run']=absolute(result['repair_context']['source_run'])
+    if result.get('workflow') in PRODUCT_ONLY_WORKFLOWS and result.get('execution_profile',LOCKED_PROFILE)==LOCKED_PROFILE:
+        result['ratio_policy']='confirmed-ratio-v1'
+        binding=result.get('approved_plan',{})
+        plan=read(binding['path']) if binding.get('path') and Path(binding['path']).is_file() else {}
+        pages={p.get('slice_id'):p for p in plan.get('pages',[]) if isinstance(p,dict)}
+        for task in result.get('tasks',[]):
+            if 'aspect_ratio' not in task:
+                page=pages.get(task.get('page_id',task['id'].removeprefix('screen-')),{})
+                task['aspect_ratio']=page.get('aspect_ratio',plan.get('aspect_ratio','9:16'))
     return result
 
 
@@ -149,8 +158,9 @@ def validate_master_contract(manifest):
                   'Optional visual preview requires explicit user master_request.evidence')
         check(stage in ('master', 'repair'), 'Master task at wrong stage')
         check(len(tasks) == 1, 'One visual master per batch')
-        ratio=('9:16' if manifest.get('execution_profile',LOCKED_PROFILE)==LOCKED_PROFILE or tasks[0].get('master_fallback_tier',0)==2 else '9:21') if workflow in PRODUCT_ONLY_WORKFLOWS else '1:3'
-        check(tasks[0].get('aspect_ratio') == ratio, 'Visual master must use '+ratio)
+        if workflow not in PRODUCT_ONLY_WORKFLOWS or manifest.get('execution_profile',LOCKED_PROFILE)!=LOCKED_PROFILE:
+            ratio=('9:16' if tasks[0].get('master_fallback_tier',0)==2 else '9:21') if workflow in PRODUCT_ONLY_WORKFLOWS else '1:3'
+            check(tasks[0].get('aspect_ratio') == ratio, 'Visual master must use '+ratio)
         return
     check(stage in ('production', 'sample', 'remaining', 'repair'), 'Final pages cannot run at master stage')
     if stage == 'sample':
@@ -232,6 +242,10 @@ def validate_review_binding(manifest):
         choices=task.get('copy_keys',{})
         check(isinstance(choices,dict) and set(choices)<=set(page_ids),'Invalid representative master copy keys')
         for pid in page_ids:
+            if task['kind']=='slice' and manifest.get('ratio_policy')=='confirmed-ratio-v1':
+                approved_ratio=by_id[pid].get('aspect_ratio',plan.get('aspect_ratio'))
+                if approved_ratio is not None:
+                    check(task['aspect_ratio']==approved_ratio,f'{task["id"]}: ratio differs from approved page {pid}')
             leaves=dict(copy_leaves(by_id[pid].get('text_exact',{})))
             keys=choices.get(pid,list(leaves))
             check(isinstance(keys,list) and (bool(keys) or not leaves) and all(key in leaves for key in keys),
@@ -301,7 +315,7 @@ def validate(manifest, *, require_review_binding=True, require_repair_authorizat
                   and t.get('gpt_style','sunburst')=='sunburst'
                   and t.get('transparent',False) is False,
                   f"Fixed production profile for {t['kind']} requires {settings['model']}, {settings['resolution']}, sunburst, quality=auto, transparent=false")
-            if t['kind']=='slice':
+            if t['kind']=='slice' and manifest.get('execution_profile',LOCKED_PROFILE)!=LOCKED_PROFILE:
                 check(t.get('aspect_ratio') == '9:16', 'Final page ratio must be 9:16')
         check(re.fullmatch(r'[1-9][0-9]*:[1-9][0-9]*',t.get('aspect_ratio','')),'Invalid ratio')
         check(t.get('references'),'Missing ordered references')
@@ -393,7 +407,7 @@ def compile_tasks(manifest, output, base_dir=None, *, reuse_preparation=False, r
         package['reference_attachments']=[
             {'load_ref':task['load_ref'],'arguments':{'kind':'image','paths':[r['path'] for r in task['references']],'replace':True}}
             for task in tasks]
-    for field in ('workflow', 'design_approval', 'visual_master', 'master_request', 'sample_review', 'staged_review_authority', 'stage_policy', 'legacy_experiment', 'completed_dependencies', 'review_delivery'):
+    for field in ('workflow', 'design_approval', 'visual_master', 'master_request', 'sample_review', 'staged_review_authority', 'stage_policy', 'legacy_experiment', 'completed_dependencies', 'review_delivery', 'ratio_policy'):
         if field in manifest: package[field] = manifest[field]
     if dest.exists():
         entries={p.name for p in dest.iterdir()}
@@ -420,8 +434,8 @@ def assert_effective_workshops(package, readbacks):
                 or task.get('gpt_style',settings['gptStyle'])!=settings['gptStyle']
                 or task.get('transparent',False) is not False):
             issues.append(f'{sid}: packaged task does not match locked profile')
-        if package['execution_profile'] in (LOCKED_PROFILE,ENTERPRISE_PROFILE):
-            ratio='9:21' if package['execution_profile']==ENTERPRISE_PROFILE and task['kind']=='master' and task.get('master_fallback_tier',0)!=2 else '9:16'
+        if package['execution_profile']==ENTERPRISE_PROFILE:
+            ratio='9:21' if task['kind']=='master' and task.get('master_fallback_tier',0)!=2 else '9:16'
             if task['aspect_ratio']!=ratio:issues.append(f'{sid}: {task["kind"]} ratio must be {ratio}')
         if not isinstance(node,dict):
             issues.append(f'{sid}: missing actual workshop readback');continue

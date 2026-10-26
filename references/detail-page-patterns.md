@@ -8,7 +8,7 @@ For translating references into concrete screen compositions and prompts, read [
 
 Default behavior:
 
-1. The Agent analyzes product/reference evidence and writes the per-screen blueprint. Preserve the confirmed count; default to 8 screens when unspecified. Final pages use fixed 9:16; shared visual rules are part of the plan.
+1. The Agent analyzes product/reference evidence and writes the per-screen blueprint. Preserve the confirmed count; default to 8 screens when unspecified. Final pages use the user-confirmed ratio (default 9:16); shared visual rules are part of the plan.
 2. First confirmation covers the whole-page design, per-screen copy and layout sketches; editable HTML is the required default review surface, opened/presented before approval; PNGs are supplementary.
 3. After design approval, submit all approved final pages concurrently using product-material references only; carry the approved palette, typography, margins and lighting as written rules. No generated master or first-two-page inspection barrier is required.
 4. After the full batch finishes, inspect the final vertical set and originals, then repair only affected pages.

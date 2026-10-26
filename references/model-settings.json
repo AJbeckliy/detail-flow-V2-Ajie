@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "verified_on": "2026-10-26",
+  "server_version": "1.8.9",
+  "model_id": "gpt-image-2.5-wd",
+  "display_name": "PT2.5-稳定",
+  "defaults": {"resolution": "1K", "aspect_ratio": "9:16", "gpt_style": "sunburst", "quality": "auto", "transparent": false},
+  "verified_ratios": ["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"],
+  "known_rejected_ratios": ["9:21"],
+  "verification_method": "canvas_prepare_run effective request readback, generationSubmitted=false",
+  "refresh_when": ["model_changed", "server_version_changed", "explicit_parameter_rejection_or_readback_drift", "requested_ratio_not_in_cache"],
+  "scope": "Verified options for this model/version; not a universal ratio restriction. Use the cache directly for matching requests."
+}

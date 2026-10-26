@@ -34,14 +34,14 @@ New tasks use profile `pt25-stable-sunburst-v4`. The user-approved UI settings a
 
 | Task kind | UI model | Manifest model_id | Resolution | Version / gptStyle | Ratio | Quality | Transparent |
 |---|---|---|---|---|---|---|---|
-| optional requested master | PT2.5-稳定 | gpt-image-2.5-wd | 1K | sunburst | 9:16 | auto | false |
-| slice | PT2.5-稳定 | gpt-image-2.5-wd | 1K | sunburst | fixed 9:16 | auto | false |
+| optional requested master | PT2.5-稳定 | gpt-image-2.5-wd | 1K | sunburst | confirmed ratio (default 9:16) | auto | false |
+| slice | PT2.5-稳定 | gpt-image-2.5-wd | 1K | sunburst | confirmed ratio (default 9:16) | auto | false |
 
-The same stable 1K/9:16 profile applies to repairs and requested previews. Do not switch new tasks to enterprise models. For a correctly configured stage node, set only its required aspect ratio; do not change its version, quality or transparency, or switch new tasks away from stable. Historical tier recovery is described separately in unified-executor.md. Prompts, approved input files and save directories remain task-specific.
+The same stable 1K profile with the confirmed ratio applies to repairs and requested previews. Do not switch new tasks to enterprise models. For a correctly configured stage node, set only its required aspect ratio; do not change its version, quality or transparency, or switch new tasks away from stable. Historical tier recovery is described separately in unified-executor.md. Prompts, approved input files and save directories remain task-specific.
 
 Compilation records `gpt_style=sunburst`, `transparent=false` and explicit `workshop_settings` for each task. Generator `modelType` is the registered UI model ID. Actual workshop `params.model` may retain that ID or encode the same sunburst version in an internal alias; the checker accepts only that stage's model family and matching resolution/version suffixes, while independently checking `gptStyle`, resolution, quality and transparency. A different tier, provider or style is not an alias. Unrecognized mappings stop for diagnosis rather than triggering a paid probe.
 
-If the required stage profile is unavailable, report the blocker. New requested previews use stable 1K/9:16 with automatic fallback disabled. Only historical enterprise-profile packages retain their old tiers; unexpected returned dimensions do not authorize a ratio/profile change. Higher resolution is intended to help text rendering, not to waive exact-copy and visual checks.
+If the required stage profile is unavailable, report the blocker. New requested previews use stable 1K and the confirmed ratio with automatic fallback disabled. Only historical enterprise-profile packages retain their old tiers; unexpected returned dimensions do not authorize a ratio/profile change. Higher resolution is intended to help text rendering, not to waive exact-copy and visual checks.
 
 At setup, inspect the exact model's live availability and relevant node fields once. Reuse that evidence for unchanged tasks within the same run; refresh after a relevant version/config change or a specific contradiction, not before every image. No paid model-discovery probe is part of setup. Inspect actual returned pixels separately; fixed request settings do not guarantee a model will obey them.
 
@@ -79,7 +79,7 @@ Normal user approval covers the plan/copy/layout; a preview gate exists only whe
 
 ## Stage vocabulary compatibility
 
-The transport script uses `master` and `slice` kinds. Normal stages are `production` -> optional `repair`; `master` is an explicitly requested preview branch only; `sample`/`remaining` remain only for historical inspection or an explicitly requested staged trial. New `master` and `slice` tasks both use stable 1K/9:16. Historical untagged v1 packages remain readable for inspection; new untagged or master-v1 compilations require explicit `legacy_experiment: {evidence: "actual authorization and scope"}`. Omitting `workflow` alone is an error, not a fallback.
+The transport script uses `master` and `slice` kinds. Normal stages are `production` -> optional `repair`; `master` is an explicitly requested preview branch only; `sample`/`remaining` remain only for historical inspection or an explicitly requested staged trial. New `master` and `slice` tasks use stable 1K and the confirmed ratio (9:16 by default). Historical untagged v1 packages remain readable for inspection; new untagged or master-v1 compilations require explicit `legacy_experiment: {evidence: "actual authorization and scope"}`. Omitting `workflow` alone is an error, not a fallback.
 
 For every new normal-flow manifest, set `workflow: "detail-flow-direct-v3"` and
 `design_approval` to a concise reference to the actual plan approval or explicit delegation.
@@ -134,7 +134,7 @@ For 8, 10 or 12 approved final pages, submit all 8, 10 or 12 after design approv
 
 A workshop may copy an input image into its output directory. A new path and timestamp do not establish new image content. Reconciliation checks each candidate's SHA256 against the task's verified input-reference hashes before ratio validation. Exact byte copies are recorded in `echoes` and excluded from selection; originals remain untouched. If every candidate is an input echo, the task fails without authorizing a retry. This detects byte-identical copies, not every visually similar or re-encoded image; Agent visual review remains required.
 
-New previews and final pages use stable 1K/9:16. Only historical enterprise-profile masters retain 9:21. Do not treat an unexpected output as permission to change the request or bypass exact readback. Layout previews remain neutral wireframes for copy and structure; page-background design controls are not added.
+New previews and final pages use stable 1K and the confirmed ratio (9:16 by default). Only historical enterprise-profile masters retain 9:21. Do not treat an unexpected output as permission to change the request or bypass exact readback. Layout previews remain neutral wireframes for copy and structure; page-background design controls are not added.
 
 
 ## Bounded recovery and fewer model round-trips

@@ -1,6 +1,6 @@
 # Local validation and another Agent
 
-The planning/copy/review layer is ordinary Skill content. The configured image executor is Starcanvas, whose model profile, tool mapping and transport schema are isolated in `starcanvas-execution.md`. This version does not implement other generation backends. Keep the approved default route; do not improvise a backend when MCP is unavailable.
+The planning/copy/review layer is ordinary Skill content. The configured image executor is Starcanvas, whose model profile, tool mapping and transport schema are isolated in `starcanvas-execution.md`. The bundled executor implements Starcanvas. Prefer that route for pages, supplemental assets and repairs. Other host tools remain available; if used, identify the actual backend and do not fabricate Starcanvas execution records.
 
 ## Capabilities
 

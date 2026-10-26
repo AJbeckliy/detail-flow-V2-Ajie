@@ -2,13 +2,17 @@
 
 ## Current readiness
 
-The executor integrates Starcanvas 1.8.8 `canvas_prepare_run`. New tasks use `detail-flow-direct-v3`: plan/copy/layout approval -> complete final-page batch -> visual review, with no master or master-waiver field required. New final pages and requested previews use PT2.5-stable (`gpt-image-2.5-wd`), 1K/9:16, profile `pt25-stable-sunburst-v4`. New previews attempt once with fallback disabled; do not switch to enterprise after a 503. Preserve older v2/v1 package semantics when inspecting or resuming; do not rewrite history.
+The executor integrates Starcanvas 1.8.8 `canvas_prepare_run`. New tasks use `detail-flow-direct-v3`: plan/copy/layout approval -> complete final-page batch -> visual review, with no master or master-waiver field required. New final pages and requested previews use PT2.5-stable (`gpt-image-2.5-wd`), 1K and the confirmed ratio (default 9:16), profile `pt25-stable-sunburst-v4`. New previews attempt once with fallback disabled; do not switch to enterprise after a 503. Preserve older v2/v1 package semantics when inspecting or resuming; do not rewrite history.
 
 The 2026-10-23 pet-harness run generated 16 no-master pages, with consistent overall style and several documented text/product defects. This supports the direct route for that case, not universal visual guarantees. The same day, a separately requested master successfully fell from a 503 at enterprise 2K to enterprise 1K/9:21; the third tier was not invoked.
 
 Preparation explicitly sets generator gptStyle/transparent, materializes native rows without generating, then cross-checks the returned effective requests against exported rows, preparation IDs/digests and save destinations. Required capability absence blocks before submission; never use paid probes to populate rows.
 
 The server returns one preparationId per workshop. For multiple nodeIds the executor preserves all bindings locally and relies on the documented per-workshop server validation; it does not pass one page's ID as the whole batch's ID. A single target passes its own preparationId. Stale-preparation rejection at the paid boundary still needs an authorized integration test. This version does not claim server-side submission idempotency.
+
+## Cached model options
+
+Use [model-settings.md](model-settings.md) and its JSON for known ratios. Do not repeat model/catalog/source inspection to rediscover them per page or repair. Keep a single normal availability check and actual execution-row readback. New stable compilations preserve a specified ratio; missing task ratios inherit the approved page/plan, then default to 9:16. New packages bind this with ratio_policy=confirmed-ratio-v1. Historical packages keep their recorded contract.
 
 ## Agent responsibilities
 
@@ -121,7 +125,7 @@ New compilations default to `pt25-stable-sunburst-v4`; old enterprise manifests 
 
 ## Project names and profile migration
 
-New projects are named DetailFlow·母版·9比21·1张·<run>, DetailFlow·正式页·9比16·10张·<run>, or DetailFlow·返修·01、09·2张·<run>. Counts and repair IDs come from actual tasks, not a hard-coded ten-page count. Each attempt retains a unique suffix. Existing canvas projects are not renamed.
+New projects are named DetailFlow·母版·9比21·1张·<run>, DetailFlow·正式页·9比16·10张·<run>, or DetailFlow·返修·01、09·2张·<run>. Counts, ratio labels and repair IDs come from actual tasks, not a hard-coded ratio or ten-page count. Each attempt retains a unique suffix. Existing canvas projects are not renamed.
 
 The earlier pt25-stage-sunburst-v3 ratio migration remains historical context. Do not silently rewrite older packages under current ratios or models. Preserve old run evidence; changing a manifest ratio does not rewrite its prompt. Update the plan and prompt consistently before compiling a new stable-profile package. The layout editor can still inspect historical layouts; its generic rendering support does not authorize other production ratios.
 
@@ -137,7 +141,7 @@ CLI doctor/prepare/run/resume reuse a live connection first, then on Windows can
 
 ## Current requested previews
 
-New previews use stable 1K/9:16, sunburst, auto, transparent=false and `master_fallback={enabled:false,max_attempts:1}`. A failure stops for diagnosis; another generation requires actual repair authority. Unsupported retry limits are rejected, never silently expanded. No preview is added to the normal direct-production flow.
+New previews use stable 1K with their confirmed ratio (default 9:16), sunburst, auto, transparent=false and `master_fallback={enabled:false,max_attempts:1}`. A failure stops for diagnosis; another generation requires actual repair authority. Unsupported retry limits are rejected, never silently expanded. No preview is added to the normal direct-production flow.
 
 ## Historical enterprise preview fallback compatibility
 

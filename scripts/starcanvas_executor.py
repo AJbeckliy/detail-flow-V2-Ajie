@@ -97,13 +97,15 @@ def verify_package(package):
 
 def project_name(package,run_id):
     tasks=package['tasks'];stage=package['ready_stage']
+    ratios={t['aspect_ratio'] for t in tasks}
+    ratio_label=next(iter(ratios)).replace(':','比') if len(ratios)==1 else '多比例'
     if stage=='repair':
         ids=[t['id'][7:] if t['id'].startswith('screen-') else t['id'] for t in tasks]
         label='返修·'+('、'.join(ids) if len(ids)<=6 else '、'.join(ids[:6])+'等')
     elif all(t['kind']=='master' for t in tasks):
         tier=tasks[0].get('master_fallback_tier',0)
-        label='预览·9比16·稳定' if package.get('execution_profile')==LOCKED_PROFILE else {0:'母版·9比21',1:'母版·9比21·降级1K',2:'母版·9比16·降级稳定'}[tier]
-    elif stage=='production':label='正式页·9比16'
+        label='预览·'+ratio_label+'·稳定' if package.get('execution_profile')==LOCKED_PROFILE else {0:'母版·9比21',1:'母版·9比21·降级1K',2:'母版·9比16·降级稳定'}[tier]
+    elif stage=='production':label='正式页·'+ratio_label
     else:label={'sample':'分阶段试图','remaining':'分阶段剩余页'}.get(stage,stage)
     return 'DetailFlow·'+label+'·'+str(len(tasks))+'张·'+run_id[:8]
 
