@@ -23,6 +23,19 @@ DetailFlow 是一个可以交给 Codex、WorkBuddy 等具备本地执行能力�
 
 同一套产品保持配色和风格统一，每一屏根据内容改变景别、构图和文字排布。展示的是实际交付图片拼接后的完整效果。
 
+### 男士内裤 · 完整详情页
+
+展示产品配色、面料细节、结构说明和尺码信息。点击长图可以直接查看整套页面的排版与衔接。
+
+**[点击查看男士内裤完整长图](https://raw.githubusercontent.com/AJbeckliy/detail-flow-V2-Ajie/main/assets/examples/mens-underwear-full.png)**
+
+<details>
+<summary>展开男士内裤长图预览</summary>
+
+[![男士内裤完整详情页，点击查看原图](assets/examples/mens-underwear-full.png)](https://raw.githubusercontent.com/AJbeckliy/detail-flow-V2-Ajie/main/assets/examples/mens-underwear-full.png)
+
+</details>
+
 ## 它能帮你做什么
 
 - **看懂产品和参考**：分析商品外观、结构、颜色，以及参考图的配色、光线和排版。

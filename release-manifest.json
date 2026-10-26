@@ -1,11 +1,12 @@
 {
   "version": 1,
-  "revision": "2026.10.26-public-v5.1",
-  "content_sha256": "cdf78c250d16ae746074b535e220a98622b9a4631fbaf242d8f8e0defb78df17",
+  "revision": "2026.10.26-public-v5.2",
+  "content_sha256": "110d9c6cffd4a4288883579e8296593cedfb6678951be71beaa99ac311049c08",
   "files": {
-    "README.md": "f9cdef5af2de437d5cfb1c53f9c20c81a6dee7f3dff05b3a488f4e0c79e68a11",
+    "README.md": "dfcc42c3da2024d319a1a7f107ef352d2e302459c79aee88ced21307d2ee83ff",
     "SKILL.md": "4b7f36c3707d9dd1b29c0bd596ef23ad6056e5cad52cfb6da5ba2e3175b71236",
     "agents/openai.yaml": "df1a1407b10be6bbd9ea2b7cc5209a6ec9df4a768c8957b9f7644d22b38271b2",
+    "assets/examples/mens-underwear-full.png": "038edd80dbf07668ea41faa09151486357b7bb77204e8fcd52f699727834bcc7",
     "assets/examples/pet-harness-16-panels.png": "3c37068ab9b12c0ec06aa70006dd1556eb47196a41ec4c4f3ea267f9981b0990",
     "examples/copy-led-workflow.json": "68e5739039984c45a1671c4d8500d527f0c7bc943184c4679ce0486ebff243a1",
     "examples/layout-preview.json": "4be5a3e79a9e01ecdf5a51fc030a853aaf06384dc6bd12b672f18ddc14b16860",
