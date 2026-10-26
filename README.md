@@ -1,4 +1,4 @@
-# DetailFlow
+# detail-flow-V2-Ajie
 
 **给产品图和参考图，让 AI 帮你完成一整套电商详情页。**
 
@@ -12,12 +12,12 @@ DetailFlow 是一个可以交给 Codex、WorkBuddy 等具备本地执行能力�
 
 这是已经完成的整套详情页长图，包含首屏、卖点、使用场景、产品细节和搭配说明。可以直接打开整图，查看从第一屏到最后一屏的整体效果。
 
-**[点击查看 16 屏完整长图](https://raw.githubusercontent.com/AJbeckliy/detail-flow/main/assets/examples/pet-harness-16-panels.png)**
+**[点击查看 16 屏完整长图](https://raw.githubusercontent.com/AJbeckliy/detail-flow-V2-Ajie/main/assets/examples/pet-harness-16-panels.png)**
 
 <details>
 <summary>展开整套长图预览</summary>
 
-[![宠物胸背牵引套装16屏完整详情页，点击查看原图](assets/examples/pet-harness-16-panels.png)](https://raw.githubusercontent.com/AJbeckliy/detail-flow/main/assets/examples/pet-harness-16-panels.png)
+[![宠物胸背牵引套装16屏完整详情页，点击查看原图](assets/examples/pet-harness-16-panels.png)](https://raw.githubusercontent.com/AJbeckliy/detail-flow-V2-Ajie/main/assets/examples/pet-harness-16-panels.png)
 
 </details>
 
@@ -47,7 +47,7 @@ DetailFlow 是一个可以交给 Codex、WorkBuddy 等具备本地执行能力�
 把下面这句话发给你的 Agent：
 
 ```text
-请从 https://github.com/AJbeckliy/detail-flow 安装 DetailFlow。
+请从 https://github.com/AJbeckliy/detail-flow-V2-Ajie 安装 DetailFlow。
 按仓库中的安装说明完成依赖和星幕画布 MCP 连接检查。
 ```
 

@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "revision": "2026.10.26-public-v5",
-  "content_sha256": "085a46c041dd43c4c7d92f6eb3ed6c348f8ae01ae49bb356e3db2e4425d6c92a",
+  "revision": "2026.10.26-public-v5.1",
+  "content_sha256": "cdf78c250d16ae746074b535e220a98622b9a4631fbaf242d8f8e0defb78df17",
   "files": {
-    "README.md": "4f61480587f5f6149c6e97c940be11b34265059511213194858476332dbb1dba",
+    "README.md": "f9cdef5af2de437d5cfb1c53f9c20c81a6dee7f3dff05b3a488f4e0c79e68a11",
     "SKILL.md": "4b7f36c3707d9dd1b29c0bd596ef23ad6056e5cad52cfb6da5ba2e3175b71236",
     "agents/openai.yaml": "df1a1407b10be6bbd9ea2b7cc5209a6ec9df4a768c8957b9f7644d22b38271b2",
     "assets/examples/pet-harness-16-panels.png": "3c37068ab9b12c0ec06aa70006dd1556eb47196a41ec4c4f3ea267f9981b0990",
