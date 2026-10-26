@@ -1,0 +1,107 @@
+// Run with an existing Playwright installation; no network or model requests.
+const {chromium}=require('playwright');
+const fs=require('node:fs');
+const path=require('node:path');
+const {pathToFileURL}=require('node:url');
+const assert=require('node:assert/strict');
+(async()=>{
+  const [html,out,browserExe]=process.argv.slice(2);
+  fs.mkdirSync(out,{recursive:false});
+  const browser=await chromium.launch({headless:true,executablePath:browserExe});
+  try{
+    const page=await browser.newPage({viewport:{width:1440,height:1100},acceptDownloads:true});
+    const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+    page.on('dialog',dialog=>dialog.accept());
+    await page.goto(pathToFileURL(path.resolve(html)).href);
+    await page.locator('.copy').first().waitFor();
+    assert.equal(await page.locator('.card').count(),3);
+    const headline=page.getByRole('textbox',{name:'第03屏 headline',exact:true});
+    const initialHeadline=await headline.inputValue();
+    await headline.fill('给自己\n片刻休息');
+    assert.match(await page.locator('#status').textContent(),/尚未导出/);
+    const label=page.getByRole('textbox',{name:'第02屏 labels.0',exact:true});
+    // Fixture may use named label keys rather than an array.
+    const annotation=await label.count()?label:page.locator('.card').nth(1).locator('textarea').first();
+    const oldLabel=await annotation.inputValue();
+    await annotation.fill('<script>原样文字</script>');
+    assert.equal(await page.locator('script:not([id])').count(),1);
+    await annotation.fill(oldLabel);
+    await headline.fill('很长的文字'.repeat(90));
+    await page.waitForTimeout(100);
+    assert.match(await headline.getAttribute('class'),/overflow/);
+    const overflowDownload=page.waitForEvent('download');await page.locator('#export').click();
+    const od=await overflowDownload;await od.saveAs(path.join(out,'overflow.json'));
+    assert.ok(JSON.parse(fs.readFileSync(path.join(out,'overflow.json'),'utf8')).review_state.browser_overflow_count>0);
+    await headline.fill('给自己\n片刻休息');
+    await page.waitForTimeout(100);
+    assert.ok(!(await headline.getAttribute('class')).includes('overflow'));
+    const wait=page.waitForEvent('download');await page.locator('#export').click();
+    const download=await wait;const edited=path.join(out,'edited.json');await download.saveAs(edited);
+    const exported=JSON.parse(fs.readFileSync(edited,'utf8'));
+    assert.equal(exported.pages[2].text_exact.headline,'给自己\n片刻休息');
+    assert.equal(exported.review_state.generation_authorized,false);
+    assert.equal(exported.review_state.prompts_require_recompile,true);
+    await headline.fill('临时内容');await page.locator('#import').setInputFiles(edited);
+    await page.waitForTimeout(100);assert.equal(await headline.inputValue(),'给自己\n片刻休息');
+    // Same-source text geometry is now editable and must round-trip.
+    const movable=exported.pages[2].layout.blocks.find(b=>b.type==='text'&&b.copy_key==='headline');
+    movable.box=[.1,.7,.8,.16];
+    const moved=path.join(out,'moved.json');fs.writeFileSync(moved,JSON.stringify(exported));
+    await page.locator('#import').setInputFiles(moved);
+    await page.waitForTimeout(100);assert.match(await page.locator('#status').textContent(),/已载入/);
+    // Out-of-bounds geometry remains invalid.
+    movable.box=[.9,.9,.8,.2];
+    const invalid=path.join(out,'invalid.json');fs.writeFileSync(invalid,JSON.stringify(exported));
+    await page.locator('#import').setInputFiles(invalid);
+    await page.waitForTimeout(100);assert.match(await page.locator('#status').textContent(),/载入失败/);
+    assert.equal(await headline.inputValue(),'给自己\n片刻休息');
+    await page.locator('#reset').click();
+    assert.equal(await headline.inputValue(),initialHeadline);
+    const first=page.locator('.card').first();
+    await first.getByRole('button',{name:'新增文案',exact:true}).click();
+    const added=first.locator('textarea[aria-label$="user_text_1"]');
+    await added.fill('新增文字');
+    // Entering another page's annotation mode must clear the previous text owner.
+    await page.locator('.card').nth(1).getByRole('button',{name:'添加批注',exact:true}).click();
+    assert.ok(await page.locator('#selection-tools').isHidden());
+    assert.equal(await page.locator('.module.selected').count(),0);
+    await page.keyboard.press('Escape');
+    await added.click();
+    assert.equal(await page.locator('#copy-editor').inputValue(),'新增文字');
+    const handle=first.getByRole('button',{name:/移动.*user_text_1/});
+    const before=await added.boundingBox(),h=await handle.boundingBox();
+    await page.mouse.move(h.x+h.width/2,h.y+h.height/2);await page.mouse.down();
+    await page.mouse.move(h.x+h.width/2+25,h.y+h.height/2+20,{steps:5});await page.mouse.up();
+    const after=await added.boundingBox();assert.ok(after.x>before.x+15&&after.y>before.y+10);
+    const resize=first.getByRole('button',{name:/调整.*user_text_1尺寸/}),rb=await resize.boundingBox();
+    await page.mouse.move(rb.x+rb.width/2,rb.y+rb.height/2);await page.mouse.down();
+    await page.mouse.move(rb.x+rb.width/2+30,rb.y+rb.height/2+20,{steps:5});await page.mouse.up();
+    assert.ok((await added.boundingBox()).width>after.width+20);
+    await first.getByRole('button',{name:'添加批注',exact:true}).click();
+    const cb=await first.locator('.canvas').boundingBox();await page.mouse.click(cb.x+cb.width*.85,cb.y+cb.height*.8);
+    assert.ok(await page.locator('#note-tools').isVisible());
+    await page.locator('#note-editor').fill('这里只是批注');
+    // A second note over a text module must retain note selection as well.
+    await first.getByRole('button',{name:'添加批注',exact:true}).click();
+    const textBox=await first.locator('textarea.copy').first().boundingBox();
+    await page.mouse.click(textBox.x+textBox.width/2,textBox.y+textBox.height/2);
+    assert.ok(await page.locator('#note-tools').isVisible());
+    await page.locator('#note-editor').fill('文字上的批注');
+    const richDownload=page.waitForEvent('download');await page.locator('#export').click();
+    await (await richDownload).saveAs(path.join(out,'rich-edited.json'));
+    const rich=JSON.parse(fs.readFileSync(path.join(out,'rich-edited.json'),'utf8'));
+    assert.equal(rich.pages[0].text_exact.user_text_1,'新增文字');
+    assert.equal(rich.pages[0].review_annotations[0].text,'这里只是批注');
+    assert.equal(rich.pages[0].review_annotations[1].text,'文字上的批注');
+    assert.equal(rich.review_state.generation_authorized,false);
+    await page.locator('#reset').click();
+    await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true});
+    await page.locator('#zoom').click();assert.ok((await page.locator('#grid').getAttribute('class')).includes('large'));
+    await page.setViewportSize({width:390,height:844});await page.waitForTimeout(100);
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+    await page.screenshot({path:path.join(out,'mobile.png'),fullPage:true});
+    assert.deepEqual(errors,[]);
+    fs.writeFileSync(path.join(out,'browser-results.json'),JSON.stringify({passed:true,checks:['inline editing','literal text','overflow export','copy/layout import roundtrip','reject out-of-bounds geometry','new copy','pointer move and resize','comment export','reset','zoom','mobile no horizontal overflow','no JS errors']},null,2));
+    console.log('Browser checks passed; exported JSON and screenshots saved.');
+  }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exit(1);});

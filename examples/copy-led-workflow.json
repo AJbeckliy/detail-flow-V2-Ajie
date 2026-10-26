@@ -1,0 +1,208 @@
+{
+  "usage": "Default: approved plan/copy/layout -> all final pages (1K/9:16) -> review. No master or master waiver required. All paths/hashes/authority strings are illustrative, not runnable approval. Optional master is only for an explicit user request.",
+  "production_manifest": {
+    "version": 1,
+    "workflow": "detail-flow-direct-v3",
+    "ready_stage": "production",
+    "authority": "Reference the actual user's authorization for final pages",
+    "design_approval": "Reference the confirmed design/copy/sketch revision",
+    "tasks": [
+      {
+        "id": "screen-01",
+        "kind": "slice",
+        "prompt_path": "screen-01.txt",
+        "model_id": "gpt-image-2.5-wd",
+        "resolution": "1K",
+        "aspect_ratio": "9:16",
+        "references": [
+          {
+            "role": "product",
+            "path": "product.jpg"
+          }
+        ],
+        "quality": "auto",
+        "gpt_style": "sunburst",
+        "transparent": false,
+        "page_id": "01"
+      }
+    ],
+    "review_delivery": {
+      "kind": "editable_html",
+      "receipt_path": "review/review-receipt.json",
+      "receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "presentation_evidence": "Replace with actual presented HTML link or observed opened editor"
+    },
+    "approved_plan": {
+      "path": "approved-plan.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "approval_evidence": "Replace with actual approval/delegation for this exact revision"
+    },
+    "execution_profile": "pt25-stable-sunburst-v4"
+  },
+  "optional_master_manifest": {
+    "version": 1,
+    "workflow": "detail-flow-direct-v3",
+    "ready_stage": "master",
+    "authority": "Reference the actual user's authorization for this run",
+    "design_approval": "Reference the confirmed design/copy/sketch revision",
+    "tasks": [
+      {
+        "id": "visual-master",
+        "kind": "master",
+        "prompt_path": "master-prompt.txt",
+        "model_id": "gpt-image-2.5-wd",
+        "resolution": "1K",
+        "aspect_ratio": "9:16",
+        "references": [
+          {
+            "role": "product",
+            "path": "product.jpg"
+          }
+        ],
+        "quality": "auto",
+        "gpt_style": "sunburst",
+        "transparent": false,
+        "page_ids": [
+          "01"
+        ],
+        "copy_keys": {
+          "01": [
+            "headline"
+          ]
+        }
+      }
+    ],
+    "review_delivery": {
+      "kind": "editable_html",
+      "receipt_path": "review/review-receipt.json",
+      "receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "presentation_evidence": "Replace with actual presented HTML link or observed opened editor"
+    },
+    "approved_plan": {
+      "path": "approved-plan.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "approval_evidence": "Replace with actual approval/delegation for this exact revision"
+    },
+    "master_request": {
+      "evidence": "Only replace this with the actual user request for a generated visual preview"
+    },
+    "execution_profile": "pt25-stable-sunburst-v4",
+    "master_fallback": {
+      "enabled": false,
+      "max_attempts": 1
+    }
+  },
+  "vertical_preview_manifest": {
+    "images": [
+      {
+        "id": "01",
+        "path": "screen-01.png"
+      },
+      {
+        "id": "02",
+        "path": "screen-02.png"
+      }
+    ]
+  },
+  "vertical_preview_command": "python scripts/compose_ordered_preview.py ordered-images.json NEW_REVIEW_DIRECTORY --width 600",
+  "optional_staged_flow": {
+    "usage": "Not the default. Use only for an explicitly requested staged trial; do not insert this delay in full-set production.",
+    "sample_manifest": {
+      "version": 1,
+      "workflow": "detail-flow-direct-v3",
+      "ready_stage": "sample",
+      "authority": "Reference the actual user's authorization for final pages",
+      "design_approval": "Reference the confirmed design/copy/sketch revision",
+      "tasks": [
+        {
+          "id": "screen-01",
+          "kind": "slice",
+          "prompt_path": "screen-01.txt",
+          "model_id": "gpt-image-2.5-1k-qy",
+          "resolution": "1K",
+          "aspect_ratio": "9:16",
+          "references": [
+            {
+              "role": "product",
+              "path": "product.jpg"
+            }
+          ],
+          "quality": "auto",
+          "gpt_style": "sunburst",
+          "transparent": false
+        }
+      ],
+      "review_delivery": {
+        "kind": "editable_html",
+        "receipt_path": "review/review-receipt.json",
+        "receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "presentation_evidence": "Replace with actual presented HTML link or observed opened editor"
+      },
+      "staged_review_authority": "Only if the user explicitly requests a small trial before the rest",
+      "approved_plan": {
+        "path": "approved-plan.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "approval_evidence": "Replace with actual approval/delegation for this exact revision"
+      }
+    },
+    "remaining_changes": {
+      "ready_stage": "remaining",
+      "sample_review": "Reference the completed internal first-page vertical audit",
+      "instructions": "Keep design_approval and the approved_plan revision; replace tasks with the explicitly requested remaining approved page subset. No master is required by default.",
+      "staged_review_authority": "Reference the same explicit staged-trial request"
+    }
+  },
+  "repair_manifest": {
+    "version": 1,
+    "workflow": "detail-flow-direct-v3",
+    "ready_stage": "repair",
+    "authority": "Actual user authority for this repair batch",
+    "design_approval": "Reference the confirmed design/copy/sketch revision",
+    "tasks": [
+      {
+        "id": "screen-01",
+        "kind": "slice",
+        "prompt_path": "screen-01.txt",
+        "model_id": "gpt-image-2.5-wd",
+        "resolution": "1K",
+        "aspect_ratio": "9:16",
+        "references": [
+          {
+            "role": "product",
+            "path": "product.jpg"
+          }
+        ],
+        "quality": "auto",
+        "gpt_style": "sunburst",
+        "transparent": false,
+        "page_id": "01"
+      }
+    ],
+    "review_delivery": {
+      "kind": "editable_html",
+      "receipt_path": "review/review-receipt.json",
+      "receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "presentation_evidence": "Replace with actual presented HTML link or observed opened editor"
+    },
+    "approved_plan": {
+      "path": "approved-plan.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "approval_evidence": "Replace with actual approval/delegation for this exact revision"
+    },
+    "execution_profile": "pt25-stable-sunburst-v4",
+    "repair_authorization": {
+      "mode": "explicit",
+      "evidence": "Actual user approval or remaining allowance for this additional generation",
+      "task_ids": [
+        "screen-01"
+      ],
+      "max_generations": 1
+    },
+    "repair_context": {
+      "source_run": "ORIGINAL_RUN_DIRECTORY",
+      "issues": {
+        "screen-01": "Replace with actual observed defect"
+      }
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "usage": "Historical master-v1 compatibility fixture only. Do not use it for new tasks. Current direct-production and explicit optional-preview shapes are in copy-led-workflow.json; ordinary production requires no master.",
+  "master_manifest": {
+    "version": 1,
+    "workflow": "detail-flow-master-v1",
+    "ready_stage": "master",
+    "authority": "Reference the actual user's authorization for this run",
+    "design_approval": "Reference the confirmed design/copy/sketch revision",
+    "tasks": [
+      {
+        "id": "visual-master",
+        "kind": "master",
+        "prompt_path": "master-prompt.txt",
+        "model_id": "selected-live-model",
+        "resolution": "1K",
+        "aspect_ratio": "1:3",
+        "references": [
+          {
+            "role": "product",
+            "path": "product.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  "sample_manifest": {
+    "version": 1,
+    "workflow": "detail-flow-master-v1",
+    "ready_stage": "sample",
+    "authority": "Reference the actual user's authorization for final pages",
+    "design_approval": "Reference the confirmed design/copy/sketch revision",
+    "visual_master": {
+      "path": "master-confirmed.png",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "approval_evidence": "Replace with actual user confirmation or explicit delegation evidence"
+    },
+    "tasks": [
+      {
+        "id": "screen-01",
+        "kind": "slice",
+        "prompt_path": "screen-01.txt",
+        "model_id": "selected-live-model",
+        "resolution": "1K",
+        "aspect_ratio": "9:16",
+        "references": [
+          {
+            "role": "product",
+            "path": "product.jpg"
+          },
+          {
+            "role": "visual_master",
+            "path": "master-confirmed.png"
+          }
+        ]
+      }
+    ]
+  },
+  "remaining_changes": {
+    "ready_stage": "remaining",
+    "sample_review": "Reference the completed internal first-page vertical audit",
+    "instructions": "Keep design_approval and the same visual_master binding; replace tasks with the remaining approved pages. Replacing the master file requires a new hash and applicable confirmation."
+  },
+  "vertical_preview_manifest": {
+    "images": [
+      {
+        "id": "01",
+        "path": "screen-01.png"
+      },
+      {
+        "id": "02",
+        "path": "screen-02.png"
+      }
+    ]
+  },
+  "vertical_preview_command": "python scripts/compose_ordered_preview.py ordered-images.json NEW_REVIEW_DIRECTORY --width 600",
+  "historical_only": "Legacy master-v1 fixture only; not a production recipe. Current production example is copy-led-workflow.json: master 9:21, final 9:16."
+}

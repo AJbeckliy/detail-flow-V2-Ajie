@@ -1,0 +1,321 @@
+{
+  "title": "三类布局审核稿 · 生活场景关系草图",
+  "aspect_ratio": "9:16",
+  "design_width": 720,
+  "pages": [
+    {
+      "slice_id": "01",
+      "buyer_question": "这是什么，第一眼看什么？",
+      "module_type": "hero_product",
+      "module_label": "品牌主视觉",
+      "claim_seed": "产品认知",
+      "screen_job": "这是什么，第一眼看什么？",
+      "evidence_type": "布局示例，无产品事实",
+      "content_density": "medium",
+      "layout_archetype": "hero_product",
+      "copy_module_type": "hero",
+      "copy_structure_pattern": "hero_claim_stack",
+      "primary_module": "完整产品",
+      "secondary_modules": [
+        "指定文案"
+      ],
+      "text_exact": {
+        "brand": "示例商品",
+        "headline": "让产品成为主角",
+        "support": "这里安排已确认的核心信息"
+      },
+      "hierarchy_strategy": "标题先读，再看产品",
+      "composition_shift": "上文下图、产品偏右",
+      "visual_composition": "几何位置由Agent明确给出，仅用于预览",
+      "reference_style_notes": "中性布局示例；实际样式按用户参考确定",
+      "risk_unknowns": [
+        "示例文案与标注点不构成商品事实"
+      ],
+      "layout": {
+        "blocks": [
+          {
+            "id": "brand",
+            "type": "text",
+            "copy_key": "brand",
+            "box": [
+              0.08,
+              0.05,
+              0.84,
+              0.05
+            ],
+            "font_size": 24
+          },
+          {
+            "id": "headline",
+            "type": "text",
+            "copy_key": "headline",
+            "box": [
+              0.08,
+              0.15,
+              0.84,
+              0.18
+            ],
+            "font_size": 54
+          },
+          {
+            "id": "support",
+            "type": "text",
+            "copy_key": "support",
+            "box": [
+              0.08,
+              0.35,
+              0.84,
+              0.07
+            ],
+            "font_size": 28
+          },
+          {
+            "id": "product",
+            "type": "placeholder",
+            "box": [
+              0.18,
+              0.46,
+              0.74,
+              0.44
+            ],
+            "label": "完整产品位置"
+          }
+        ]
+      }
+    },
+    {
+      "slice_id": "02",
+      "buyer_question": "哪些可见细节需要解释？",
+      "module_type": "detail_annotation",
+      "module_label": "结构细节",
+      "claim_seed": "产品认知",
+      "screen_job": "哪些可见细节需要解释？",
+      "evidence_type": "布局示例，无产品事实",
+      "content_density": "medium",
+      "layout_archetype": "detail_annotation",
+      "copy_module_type": "annotations",
+      "copy_structure_pattern": "annotation_map",
+      "primary_module": "可见结构",
+      "secondary_modules": [
+        "指定文案"
+      ],
+      "text_exact": {
+        "headline": "细节，看得更清楚",
+        "labels": [
+          "结构标注 A",
+          "结构标注 B"
+        ]
+      },
+      "hierarchy_strategy": "先看结构，沿标注读说明",
+      "composition_shift": "近景与错位标注、标题置底",
+      "visual_composition": "几何位置由Agent明确给出，仅用于预览",
+      "reference_style_notes": "中性布局示例；实际样式按用户参考确定",
+      "risk_unknowns": [
+        "示例文案与标注点不构成商品事实"
+      ],
+      "layout": {
+        "blocks": [
+          {
+            "id": "product",
+            "type": "placeholder",
+            "box": [
+              0.06,
+              0.23,
+              0.88,
+              0.49
+            ],
+            "label": "产品结构近景"
+          },
+          {
+            "id": "label_a",
+            "type": "annotation",
+            "copy_key": "labels.0",
+            "box": [
+              0.07,
+              0.1,
+              0.4,
+              0.07
+            ],
+            "font_size": 28,
+            "target": {
+              "block_id": "product",
+              "uv": [
+                0.4,
+                0.29
+              ]
+            }
+          },
+          {
+            "id": "label_b",
+            "type": "annotation",
+            "copy_key": "labels.1",
+            "box": [
+              0.57,
+              0.75,
+              0.36,
+              0.07
+            ],
+            "font_size": 28,
+            "target": {
+              "block_id": "product",
+              "uv": [
+                0.74,
+                0.58
+              ]
+            }
+          },
+          {
+            "id": "headline",
+            "type": "text",
+            "copy_key": "headline",
+            "box": [
+              0.08,
+              0.85,
+              0.84,
+              0.08
+            ],
+            "font_size": 42
+          }
+        ]
+      }
+    },
+    {
+      "slice_id": "03",
+      "buyer_question": "产品怎样进入生活情境？",
+      "module_type": "scenario_editorial",
+      "module_label": "生活场景",
+      "claim_seed": "产品认知",
+      "screen_job": "产品怎样进入生活情境？",
+      "evidence_type": "布局示例，无产品事实",
+      "content_density": "low",
+      "layout_archetype": "scenario_editorial",
+      "copy_module_type": "scene_caption",
+      "copy_structure_pattern": "scene_caption_cluster",
+      "primary_module": "人物与环境",
+      "secondary_modules": [
+        "指定文案"
+      ],
+      "text_exact": {
+        "headline": "让场景说明用途",
+        "body": "这里安排场景说明。\n只使用已确认内容。"
+      },
+      "hierarchy_strategy": "先看场景，再读轻量文案",
+      "composition_shift": "大场景＋下方文案、前景产品",
+      "visual_composition": "坐姿人物与沙发形成前后关系，产品符号关联颈部；右上留文案空间。线条是关系示意，最终人物姿态、环境、光影可调整。",
+      "reference_style_notes": "中性布局示例；实际样式按用户参考确定",
+      "risk_unknowns": [
+        "示例文案与标注点不构成商品事实"
+      ],
+      "layout": {
+        "blocks": [
+          {
+            "id": "scene",
+            "type": "sketch",
+            "box": [
+              0.04,
+              0.07,
+              0.92,
+              0.87
+            ],
+            "components": [
+              {
+                "id": "window",
+                "kind": "window",
+                "box": [
+                  0.04,
+                  0.02,
+                  0.35,
+                  0.3
+                ]
+              },
+              {
+                "id": "floor",
+                "kind": "polyline",
+                "box": [
+                  0.01,
+                  0.83,
+                  0.98,
+                  0.15
+                ],
+                "points": [
+                  [
+                    0,
+                    0.18
+                  ],
+                  [
+                    0.55,
+                    0
+                  ],
+                  [
+                    1,
+                    0.22
+                  ]
+                ]
+              },
+              {
+                "id": "sofa",
+                "kind": "sofa",
+                "box": [
+                  0.02,
+                  0.43,
+                  0.94,
+                  0.48
+                ]
+              },
+              {
+                "id": "person",
+                "kind": "person_seated",
+                "box": [
+                  0.15,
+                  0.3,
+                  0.68,
+                  0.66
+                ]
+              },
+              {
+                "id": "product",
+                "kind": "neck_product",
+                "attach_to": {
+                  "component": "person",
+                  "anchor": "neck"
+                },
+                "size": [
+                  0.19,
+                  0.075
+                ]
+              }
+            ],
+            "overlap_with": [
+              "headline",
+              "body"
+            ]
+          },
+          {
+            "id": "headline",
+            "type": "text",
+            "copy_key": "headline",
+            "box": [
+              0.51,
+              0.12,
+              0.42,
+              0.1
+            ],
+            "font_size": 38
+          },
+          {
+            "id": "body",
+            "type": "text",
+            "copy_key": "body",
+            "box": [
+              0.54,
+              0.26,
+              0.39,
+              0.14
+            ],
+            "font_size": 26
+          }
+        ]
+      }
+    }
+  ]
+}

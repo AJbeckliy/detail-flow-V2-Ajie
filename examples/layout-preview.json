@@ -1,0 +1,264 @@
+{
+  "title": "详情页三类布局示例",
+  "aspect_ratio": "9:16",
+  "design_width": 720,
+  "pages": [
+    {
+      "slice_id": "01",
+      "buyer_question": "这是什么，第一眼看什么？",
+      "module_type": "hero_product",
+      "module_label": "品牌主视觉",
+      "claim_seed": "产品认知",
+      "screen_job": "这是什么，第一眼看什么？",
+      "evidence_type": "布局示例，无产品事实",
+      "content_density": "medium",
+      "layout_archetype": "hero_product",
+      "copy_module_type": "hero",
+      "copy_structure_pattern": "hero_claim_stack",
+      "primary_module": "完整产品",
+      "secondary_modules": [
+        "指定文案"
+      ],
+      "text_exact": {
+        "brand": "示例商品",
+        "headline": "让产品成为主角",
+        "support": "这里安排已确认的核心信息"
+      },
+      "hierarchy_strategy": "标题先读，再看产品",
+      "composition_shift": "上文下图、产品偏右",
+      "visual_composition": "几何位置由Agent明确给出，仅用于预览",
+      "reference_style_notes": "中性布局示例；实际样式按用户参考确定",
+      "risk_unknowns": [
+        "示例文案与标注点不构成商品事实"
+      ],
+      "layout": {
+        "blocks": [
+          {
+            "id": "brand",
+            "type": "text",
+            "copy_key": "brand",
+            "box": [
+              0.08,
+              0.05,
+              0.84,
+              0.05
+            ],
+            "font_size": 24
+          },
+          {
+            "id": "headline",
+            "type": "text",
+            "copy_key": "headline",
+            "box": [
+              0.08,
+              0.15,
+              0.84,
+              0.18
+            ],
+            "font_size": 54
+          },
+          {
+            "id": "support",
+            "type": "text",
+            "copy_key": "support",
+            "box": [
+              0.08,
+              0.35,
+              0.84,
+              0.07
+            ],
+            "font_size": 28
+          },
+          {
+            "id": "product",
+            "type": "placeholder",
+            "box": [
+              0.18,
+              0.46,
+              0.74,
+              0.44
+            ],
+            "label": "完整产品位置"
+          }
+        ]
+      }
+    },
+    {
+      "slice_id": "02",
+      "buyer_question": "哪些可见细节需要解释？",
+      "module_type": "detail_annotation",
+      "module_label": "结构细节",
+      "claim_seed": "产品认知",
+      "screen_job": "哪些可见细节需要解释？",
+      "evidence_type": "布局示例，无产品事实",
+      "content_density": "medium",
+      "layout_archetype": "detail_annotation",
+      "copy_module_type": "annotations",
+      "copy_structure_pattern": "annotation_map",
+      "primary_module": "可见结构",
+      "secondary_modules": [
+        "指定文案"
+      ],
+      "text_exact": {
+        "headline": "细节，看得更清楚",
+        "labels": [
+          "结构标注 A",
+          "结构标注 B"
+        ]
+      },
+      "hierarchy_strategy": "先看结构，沿标注读说明",
+      "composition_shift": "近景与错位标注、标题置底",
+      "visual_composition": "几何位置由Agent明确给出，仅用于预览",
+      "reference_style_notes": "中性布局示例；实际样式按用户参考确定",
+      "risk_unknowns": [
+        "示例文案与标注点不构成商品事实"
+      ],
+      "layout": {
+        "blocks": [
+          {
+            "id": "product",
+            "type": "placeholder",
+            "box": [
+              0.06,
+              0.23,
+              0.88,
+              0.49
+            ],
+            "label": "产品结构近景"
+          },
+          {
+            "id": "label_a",
+            "type": "annotation",
+            "copy_key": "labels.0",
+            "box": [
+              0.07,
+              0.1,
+              0.4,
+              0.07
+            ],
+            "font_size": 28,
+            "target": {
+              "block_id": "product",
+              "uv": [
+                0.4,
+                0.29
+              ]
+            }
+          },
+          {
+            "id": "label_b",
+            "type": "annotation",
+            "copy_key": "labels.1",
+            "box": [
+              0.57,
+              0.75,
+              0.36,
+              0.07
+            ],
+            "font_size": 28,
+            "target": {
+              "block_id": "product",
+              "uv": [
+                0.74,
+                0.58
+              ]
+            }
+          },
+          {
+            "id": "headline",
+            "type": "text",
+            "copy_key": "headline",
+            "box": [
+              0.08,
+              0.85,
+              0.84,
+              0.08
+            ],
+            "font_size": 42
+          }
+        ]
+      }
+    },
+    {
+      "slice_id": "03",
+      "buyer_question": "产品怎样进入生活情境？",
+      "module_type": "scenario_editorial",
+      "module_label": "生活场景",
+      "claim_seed": "产品认知",
+      "screen_job": "产品怎样进入生活情境？",
+      "evidence_type": "布局示例，无产品事实",
+      "content_density": "low",
+      "layout_archetype": "scenario_editorial",
+      "copy_module_type": "scene_caption",
+      "copy_structure_pattern": "scene_caption_cluster",
+      "primary_module": "人物与环境",
+      "secondary_modules": [
+        "指定文案"
+      ],
+      "text_exact": {
+        "headline": "让场景说明用途",
+        "body": "这里安排场景说明。\n只使用已确认内容。"
+      },
+      "hierarchy_strategy": "先看场景，再读轻量文案",
+      "composition_shift": "大场景＋下方文案、前景产品",
+      "visual_composition": "几何位置由Agent明确给出，仅用于预览",
+      "reference_style_notes": "中性布局示例；实际样式按用户参考确定",
+      "risk_unknowns": [
+        "示例文案与标注点不构成商品事实"
+      ],
+      "layout": {
+        "blocks": [
+          {
+            "id": "scene",
+            "type": "placeholder",
+            "box": [
+              0.05,
+              0.06,
+              0.9,
+              0.6
+            ],
+            "label": "人物 / 使用场景占位"
+          },
+          {
+            "id": "product",
+            "type": "placeholder",
+            "box": [
+              0.64,
+              0.61,
+              0.28,
+              0.29
+            ],
+            "label": "前景产品",
+            "overlap_with": [
+              "scene"
+            ]
+          },
+          {
+            "id": "headline",
+            "type": "text",
+            "copy_key": "headline",
+            "box": [
+              0.08,
+              0.72,
+              0.48,
+              0.08
+            ],
+            "font_size": 38
+          },
+          {
+            "id": "body",
+            "type": "text",
+            "copy_key": "body",
+            "box": [
+              0.08,
+              0.83,
+              0.48,
+              0.12
+            ],
+            "font_size": 27
+          }
+        ]
+      }
+    }
+  ]
+}

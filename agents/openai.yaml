@@ -1,5 +1,9 @@
 interface:
-  display_name: "DetailFlow"
-  short_description: "Plan, generate, audit, and deliver ecommerce detail pages."
-  default_prompt: "Use $detail-flow to create an 8-screen ecommerce detail page from my product image and style reference."
-
+  display_name: "DetailFlow · 星幕执行"
+  short_description: "Agent planning, Starcanvas execution, and Agent review."
+  default_prompt: "Use $detail-flow to plan my ecommerce page images, execute approved prompts through Starcanvas MCP, then review the returned originals."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "synmew-canvas"
+      description: "Execute approved image prompts and return saved outputs"
