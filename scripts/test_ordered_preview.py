@@ -48,5 +48,13 @@ class OrderedPreviewTests(unittest.TestCase):
         with self.assertRaises(ValueError):self.run_compose()
         self.assertEqual(before,p.read_bytes())
 
+    def test_grouped_review_retains_page_order(self):
+        r=self.run_compose()
+        self.assertEqual(r['review_groups'][0]['ids'],['02','01'])
+        with Image.open(r['review_groups'][0]['path']) as im:
+            self.assertEqual(im.size,(240,272))
+            self.assertEqual(im.getpixel((60,92)),(0,0,255))
+            self.assertEqual(im.getpixel((180,152)),(255,0,0))
+
 
 if __name__=='__main__':unittest.main()

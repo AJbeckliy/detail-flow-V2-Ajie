@@ -28,7 +28,7 @@ python scripts/prepare_review.py examples/layout-preview.json NEW_REVIEW_FOLDER 
 
 Open the HTML; edit one page, switch to another page's annotation mode, add/remove a module, export and re-import. The inspector must not retain a different page's selection. Adopt a valid draft separately and render it again. An empty page remains an incomplete draft; restoring content does not authorize generation.
 
-For transport, build a synthetic manifest with real local fixture paths, fake model settings and explicitly labelled test evidence; compile from a different working directory and inspect the package. Compilation and synthetic evidence do not authorize submitting it. Use the shapes in `examples/copy-led-workflow.json`, not the historical master-v1 fixture.
+For transport, build a synthetic manifest with real local fixture paths, fake model settings and explicitly labelled test evidence; compile from a different working directory and inspect the package. Compilation and synthetic evidence do not authorize submitting it. Use the current shapes in examples/reviewed-workflow.json; older copy-led/master fixtures are compatibility evidence, not new-job defaults.
 
 Report separately: structure, local scripts, real browser interactions, target-Agent behavior, and actual generated-image quality. A pass in one category does not establish the others.
 

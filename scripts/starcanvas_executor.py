@@ -80,7 +80,7 @@ def canonical_operations(tasks):
 
 
 def verify_package(package):
-    check(package.get('workflow') in ('detail-flow-copy-led-v2','detail-flow-direct-v3') and package.get('execution_profile') in (LOCKED_PROFILE,ENTERPRISE_PROFILE),
+    check(package.get('workflow') in ('detail-flow-copy-led-v2','detail-flow-direct-v3','detail-flow-direct-v4') and package.get('execution_profile') in (LOCKED_PROFILE,ENTERPRISE_PROFILE),
           'Executor requires a newly compiled current-profile package, not a legacy/experimental package')
     # Old immutable packages remain resumable; every new CLI compilation is bound.
     validate(package,require_review_binding='review_binding_version' in package,
@@ -220,7 +220,10 @@ class Executor:
         self.verify_snapshot()
 
     def prepare(self,package_path):
-        check(self.state is None,'Run already exists; do not recreate or overwrite it')
+        if self.state is not None:
+            check(self.state['status'] in ('preparing','preparation_failed'),'Run already exists; do not recreate or overwrite it')
+            check(sha(package_path)==self.state.get('source_package_sha256'),'Supplied package differs from this prepared run')
+            return self.continue_preparation()
         check(not any(p.name!='executor.lock' for p in self.folder.iterdir()),'Use a new empty run directory')
         p=read(package_path);verify_package(p)
         check(p['ready_stage']!='repair' or p.get('repair_canvas_version')==1,
@@ -232,49 +235,74 @@ class Executor:
         self.state={'version':1,'run_id':uuid.uuid4().hex,'status':'preparing','project_id':None,'revision':0,
                     'package_sha256':sha(self.folder/'package.json'),'created_at_ms':round(self.clock()*1000),
                     'source_package_sha256':sha(package_path),
-                    'id_map':{},'readbacks':{},'batches':[],'tasks':{},'submission_authorized':False}
+                    'id_map':{},'readbacks':{},'batches':[],'tasks':{},'submission_authorized':False,'preparation_version':1}
         self.save()
+        return self.continue_preparation()
+
+    def continue_preparation(self):
+        check(self.state and self.state.get('preparation_version')==1,'Historical incomplete preparation needs inspection; do not recreate its nodes')
+        check(self.state['status'] in ('preparing','preparation_failed') and not self.state.get('batches')
+              and not self.state.get('submission_authorized'),'Only unsubmitted preparation can be recovered')
+        self.verify_frozen();p=self.package
+        self.state['status']='preparing';self.state.pop('error',None);self.save()
         try:
             self.bootstrap()
             for model in sorted({t['model_id'] for t in p['tasks']}):
                 cap=self.call('model_get_capabilities',{'modelId':model})
                 check(cap.get('accountAvailable') is True,f'Required model unavailable: {model}')
-            existing_ids=set();operations=p['operations']
-            if p.get('repair_canvas_version')==1:
-                from repair_canvas import context,placed_operations
-                binding=context(p);source=read(Path(binding['source_run'])/'state.json')
-                self.state.update(project_id=binding['project_id'],project_name=source.get('project_name',binding['project_id']))
-                self.save()
-                snapshot,_=self.snapshot('original-canvas-before-repair')
-                operations,existing_ids=placed_operations(p,snapshot,self.state['run_id'])
-                atomic_json(self.folder/'repair-operations.json',operations)
+            operations_file=self.folder/'prepared-operations.json'
+            existing_ids=set(self.state.get('original_node_ids',[]))
+            if not self.state.get('project_id'):
+                if p.get('repair_canvas_version')==1:
+                    from repair_canvas import context
+                    binding=context(p);source=read(Path(binding['source_run'])/'state.json')
+                    self.state.update(project_id=binding['project_id'],project_name=source.get('project_name',binding['project_id']))
+                    self.save()
+                else:
+                    ack=self.folder/'project-create-ack.json'
+                    if ack.exists():data=read(ack)
+                    else:
+                        check(not self.state.get('project_create_intent'),'Project creation outcome unknown; inspect without creating another project')
+                        self.state['project_name']=project_name(p,self.state['run_id'])
+                        self.state['project_create_intent']=True;self.save()
+                        data=self.call('project_create',{'kind':'batch','name':self.state['project_name']})
+                        atomic_json(ack,data)
+                    check(isinstance(data.get('projectId'),str),'Project creation did not return projectId')
+                    self.state['project_id']=data['projectId'];self.save()
+            if self.state.get('preparation_operations_sha256'):
+                check(operations_file.is_file() and sha(operations_file)==self.state['preparation_operations_sha256'],'Prepared operation plan changed')
+                operations=read(operations_file)
             else:
-                self.state['project_name']=project_name(p,self.state['run_id']);self.save()
-                data=self.call('project_create',{'kind':'batch','name':self.state['project_name']})
-                check(isinstance(data.get('projectId'),str),'Project creation did not return projectId')
-                self.state['project_id']=data['projectId'];self.save()
+                check(not self.state.get('node_batches'),'Cannot rebuild a partially applied operation plan')
+                operations=p['operations']
+                if p.get('repair_canvas_version')==1:
+                    from repair_canvas import placed_operations
+                    snapshot,_=self.snapshot('original-canvas-before-repair')
+                    operations,existing_ids=placed_operations(p,snapshot,self.state['run_id'])
+                    atomic_json(self.folder/'repair-operations.json',operations)
+                atomic_json(operations_file,operations)
+                self.state.update(preparation_operations_sha256=sha(operations_file),original_node_ids=sorted(existing_ids));self.save()
+            from preparation_batches import create_nodes
+            ids=create_nodes(self,operations,existing_ids)
             summary=self.call('canvas_get_summary',{'projectId':self.state['project_id']})
-            check(isinstance(summary.get('revision'),int) and not isinstance(summary['revision'],bool),'New project revision unavailable')
             self.state['revision']=summary['revision'];self.save()
-            created=self.checked_mutation('workflow_apply_patch',{'operations':operations},'create-nodes')
-            ids=created.get('idMap')
-            expected={t[key] for t in p['tasks'] for key in ('load_ref','gen_ref','workshop_ref')}
-            expected.update(t['note_ref'] for t in p['tasks'] if t.get('note_ref'))
-            check(isinstance(ids,dict) and expected<=set(ids) and len({ids[k] for k in expected})==len(expected),
-                  'Creation did not return unique per-page node mappings')
-            check(not existing_ids.intersection(ids[k] for k in expected),'Repair mapping reused original nodes')
-            self.state['id_map']={k:ids[k] for k in expected};self.save()
             self.state['node_notes']={ids[op['clientRef']]:op['data']['content'] for op in operations
                                       if op['op']=='createNode' and op.get('type')=='text/note'}
             self.save()
             for t in p['tasks']:
-                self.checked_mutation('canvas_attach_local_images',{'nodeId':ids[t['load_ref']],'kind':'image',
-                    'paths':[r['path'] for r in t['references']],'replace':True})
-                self.checked_mutation('canvas_attach_local_images',{'nodeId':ids[t['workshop_ref']],'kind':'save',
-                    'folderPath':t['output_dir']})
+                for suffix,args in [('load',{'nodeId':ids[t['load_ref']],'kind':'image','paths':[r['path'] for r in t['references']],'replace':True}),
+                                    ('save',{'nodeId':ids[t['workshop_ref']],'kind':'save','folderPath':t['output_dir']})]:
+                    key=t['id']+'-'+suffix
+                    if key not in self.state.setdefault('configured_steps',[]):
+                        self.checked_mutation('canvas_attach_local_images',args)
+                        self.state['configured_steps'].append(key);self.save()
             ops=[{'op':'updateNode','nodeId':ids[t['gen_ref']],
                   'data':{'gptStyle':t['gpt_style'],'transparent':t['transparent']}} for t in p['tasks']]
-            self.checked_mutation('workflow_apply_patch',{'operations':ops},'stage-options')
+            for offset in range(0,len(ops),80):
+                key='stage-options-'+str(offset)
+                if key not in self.state.setdefault('configured_steps',[]):
+                    self.checked_mutation('workflow_apply_patch',{'operations':ops[offset:offset+80]},key)
+                    self.state['configured_steps'].append(key);self.save()
             prepared=self.call('canvas_prepare_run',{'projectId':self.state['project_id'],
                 'nodeIds':[ids[t['workshop_ref']] for t in p['tasks']],'goal':'save'})
             atomic_json(self.folder/'prepare-response.json',prepared)
@@ -307,6 +335,7 @@ class Executor:
             if p.get('repair_canvas_version')==1:
                 from repair_canvas import trace
                 atomic_json(self.folder/'canvas-trace.json',trace(p,self.state))
+            self.write_report()
         except Exception as exc:
             self.state['status']='preparation_failed'
             self.state['error_type']=type(exc).__name__
@@ -495,8 +524,7 @@ class Executor:
         try:
             report['usage']=summarize([self.folder])
         except (ValueError,OSError,KeyError,TypeError) as exc:
-            report['usage']={'status':'accounting_incomplete','actual_star_coins':None,
-                             'star_coins_status':'pending_verification','error_type':type(exc).__name__}
+            report['usage']={'status':'counts_incomplete','error_type':type(exc).__name__}
         atomic_json(self.folder/'report.json',report)
 
     def select_candidates(self,selections):
@@ -603,7 +631,7 @@ def main():
                 worker=Executor(client,a.run_dir,progress=lambda value:print(json.dumps(value,ensure_ascii=False),flush=True))
                 if worker.state is not None and a.command in ('prepare','run'):
                     check(sha(a.package)==worker.state.get('source_package_sha256'),'Supplied package differs from this prepared run')
-                if worker.state is None:worker.prepare(a.package)
+                if worker.state is None or (a.command=='prepare' and worker.state['status'] in ('preparing','preparation_failed')):worker.prepare(a.package)
                 if a.command=='prepare':
                     check(worker.state['status']=='prepared','Existing run is not prepared; inspect status')
                     print(json.dumps(worker.summary(),ensure_ascii=False));return 0

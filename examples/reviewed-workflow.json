@@ -1,0 +1,123 @@
+{
+  "usage": "Current v4 shape. Replace example files, hashes and evidence with actual current-product records. This file is not generation authority.",
+  "plan_fragment": {
+    "title": "当前商品",
+    "aspect_ratio": "9:16",
+    "product_context": {
+      "product_id": "fresh-id-created-for-this-product",
+      "name": "当前商品",
+      "page_count": 1,
+      "language": "zh-CN",
+      "aspect_ratio": "9:16",
+      "ratio_source": "本产品未指定，采用默认值",
+      "assets": [
+        {
+          "path": "product.png",
+          "sha256": "ACTUAL_PRODUCT_SHA256"
+        }
+      ]
+    },
+    "pages": [
+      {
+        "slice_id": "01",
+        "module_type": "detail",
+        "visual_composition": "以商品可见部件的近景为主体，说明文字放在右侧。",
+        "product_display": "absent",
+        "text_exact": {
+          "headline": "当前批准标题"
+        },
+        "reference_images": [
+          {
+            "role": "product",
+            "path": "product.png",
+            "sha256": "ACTUAL_PRODUCT_SHA256"
+          }
+        ],
+        "layout": {
+          "blocks": [
+            {
+              "id": "detail",
+              "type": "placeholder",
+              "label": "部件近景",
+              "box": [
+                0.06,
+                0.2,
+                0.52,
+                0.6
+              ]
+            },
+            {
+              "id": "headline",
+              "type": "text",
+              "copy_key": "headline",
+              "box": [
+                0.62,
+                0.2,
+                0.32,
+                0.25
+              ],
+              "font_size": 28
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "production_manifest": {
+    "version": 1,
+    "workflow": "detail-flow-direct-v4",
+    "product_id": "fresh-id-created-for-this-product",
+    "ready_stage": "production",
+    "authority": "ACTUAL_USER_GENERATION_AUTHORITY",
+    "design_approval": "ACTUAL_CURRENT_PLAN_APPROVAL",
+    "reference_policy": {
+      "mode": "text_only"
+    },
+    "approved_plan": {
+      "path": "approved-plan.json",
+      "sha256": "ACTUAL_APPROVED_PLAN_SHA256",
+      "approval_evidence": "ACTUAL_CURRENT_REVISION_APPROVAL"
+    },
+    "review_delivery": {
+      "kind": "editable_html",
+      "receipt_path": "review/review-receipt.json",
+      "receipt_sha256": "ACTUAL_RECEIPT_SHA256",
+      "presentation_evidence": "ACTUAL_USER_VISIBLE_REVIEW_LINK"
+    },
+    "tasks": [
+      {
+        "id": "screen-01",
+        "page_id": "01",
+        "kind": "slice",
+        "prompt_path": "screen-01.txt",
+        "model_id": "gpt-image-2.5-wd",
+        "resolution": "1K",
+        "aspect_ratio": "9:16",
+        "references": [
+          {
+            "role": "product",
+            "path": "product.png"
+          }
+        ]
+      }
+    ]
+  },
+  "prompt_example": "以商品可见部件的近景为主体，说明文字放在右侧。\n本屏不展示完整商品或包装，产品图仅用于身份核对。\n画面准确呈现：当前批准标题",
+  "optional_mixed_reference_entry": {
+    "role": "composition",
+    "path": "reference-module.png",
+    "source_path": "reference-long.jpg",
+    "crop_box": [
+      0,
+      0.25,
+      1,
+      0.2
+    ],
+    "purpose": "仅借鉴近景尺度与图文关系",
+    "exclude": [
+      "不迁移参考品牌、商品结构和宣传数据"
+    ],
+    "sha256": "ACTUAL_FRAGMENT_SHA256",
+    "source_sha256": "ACTUAL_REFERENCE_ORIGINAL_SHA256"
+  }
+}

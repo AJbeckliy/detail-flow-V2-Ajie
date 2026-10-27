@@ -1,6 +1,5 @@
-"""Read-only image/attempt accounting and evidenced star-coin reconciliation."""
+"""Read-only image, task and delivery quantity reporting."""
 import argparse
-from decimal import Decimal, InvalidOperation
 import json
 from pathlib import Path
 from PIL import Image
@@ -41,15 +40,7 @@ def run_usage(folder):
             'images':list(images.values()),'warnings':sorted(set(warnings))}
 
 
-def amount(value):
-    check(isinstance(value,(int,float,str)) and not isinstance(value,bool),'Star coins must be numeric')
-    try:n=Decimal(str(value))
-    except InvalidOperation:raise ValueError('Invalid star coins') from None
-    check(n.is_finite() and n>=0,'Star coins must be finite and nonnegative')
-    return n
-
-
-def summarize(run_dirs, delivery=None, billing=None):
+def summarize(run_dirs, delivery=None):
     folders=[];seen=set()
     def add(folder):
         root=Path(folder).resolve();key=path_key(root)
@@ -87,35 +78,13 @@ def summarize(run_dirs, delivery=None, billing=None):
             check(p.is_file() and sha(p)==item.get('sha256'),'Final delivery image changed/missing')
             check(item['sha256'] in generated_hashes,'Final delivery image is not from the supplied runs')
             ids.add(sid);keys.add(key);delivered.append({'id':sid,'path':str(p),'sha256':item['sha256']})
-    charged={};billing_evidence=None
-    if billing:
-        path=Path(billing).resolve();ledger=read(path)
-        check(ledger.get('currency')=='star_coin' and ledger.get('kind')=='actual_platform_bill',
-              'Only actual platform star-coin bills are accepted, never estimates or balance differences')
-        ev=ledger.get('evidence',{});source=(path.parent/Path(ev.get('path',''))).resolve()
-        check(source!=path,'Normalized ledger cannot be its own original billing evidence')
-        check(source.is_file() and sha(source)==ev.get('sha256'),'Original billing evidence missing or changed')
-        billing_evidence={'path':str(source),'sha256':ev['sha256'],'ledger_sha256':sha(path)}
-        check(isinstance(ledger.get('records'),list),'Billing records required')
-        for row in ledger['records']:
-            tid=row.get('task_id')
-            check(tid in tasks and tid not in charged,'Unknown or duplicated billed task')
-            debit=amount(row.get('charged_star_coins'));refund=amount(row.get('refunded_star_coins',0))
-            check(refund<=debit,'Refund exceeds charged amount')
-            charged[tid]=debit-refund
-    unknown=max(0,len(intents)-len(tasks));missing=sorted(set(tasks)-set(charged))
-    complete=not missing and unknown==0
-    total=sum(charged.values(),Decimal(0))
-    result={'status':'accounting_only_not_visual_approval','runs':runs,
+    unknown=max(0,len(intents)-len(tasks))
+    result={'status':'counts_only_not_visual_approval','runs':runs,
             'generation_attempts_recorded':len(intents),'confirmed_generation_tasks':len(tasks),
             'unconfirmed_attempts':unknown,'generated_image_count':len(images),
             'final_delivered_image_count':len(delivered) if delivery else None,
             'repair_generation_tasks':sum(t['stage']=='repair' for t in tasks.values()),
             'preview_generation_tasks':sum(t['kind']=='master' for t in tasks.values()),
-            'star_coins_status':'verified' if complete else 'pending_verification',
-            'actual_star_coins':str(total) if complete else None,
-            'verified_partial_star_coins':str(total) if charged else None,
-            'unbilled_task_ids':missing,'billing_evidence':billing_evidence,
             'tasks':list(tasks.values()),'generated_images':list(images.values()),'delivered_images':delivered,
             'image_count_complete':not warnings and unknown==0,
             'warnings':sorted(set(warnings)),'new_generation_calls':0}
@@ -123,13 +92,11 @@ def summarize(run_dirs, delivery=None, billing=None):
 
 
 def human_summary(result):
-    """User-facing counts; show cost only when the complete actual total is verified."""
+    """User-facing delivery counts, without financial fields."""
     text=(f"最终交付：{result['final_delivered_image_count']} 张\n累计已保存生成图片：{result['generated_image_count']} 张（含候选及返修）\n"
           f"已确认生成任务：{result['confirmed_generation_tasks']} 次；其中返修 {result['repair_generation_tasks']} 次、预览 {result['preview_generation_tasks']} 次\n")
     if result['unconfirmed_attempts']:
         text+=f"提交结果未确认：{result['unconfirmed_attempts']} 次\n"
-    if result['star_coins_status']=='verified' and result['actual_star_coins'] is not None:
-        text+=f"实际净消耗：{result['actual_star_coins']} 星币\n"
     if not result['image_count_complete']:
         text+='图片统计尚不完整：存在结果未确认或文件不可读，详见 JSON。\n'
     return text
@@ -139,17 +106,15 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--runs',type=Path,nargs='+',required=True)
     p.add_argument('--delivery',type=Path,required=True,help='Final reviewed originals: images with id/path/sha256')
-    p.add_argument('--billing',type=Path,help='Normalized actual bill with original evidence; omit if unavailable')
     p.add_argument('--output',type=Path,required=True)
     a=p.parse_args()
     try:
         check(not a.output.exists(),'Preserve existing accounting; use a new output folder')
-        result=summarize(a.runs,a.delivery,a.billing)
+        result=summarize(a.runs,a.delivery)
         a.output.mkdir(parents=True)
         (a.output/'usage-summary.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
         text=human_summary(result)
-        name='费用统计.txt' if result['star_coins_status']=='verified' and result['actual_star_coins'] is not None else '交付统计.txt'
-        (a.output/name).write_text(text,encoding='utf-8');print(text)
+        (a.output/'交付统计.txt').write_text(text,encoding='utf-8');print(text)
     except (ValueError,OSError,KeyError,TypeError) as exc:p.exit(2,str(exc)+'\n')
 
 

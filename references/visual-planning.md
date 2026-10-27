@@ -11,7 +11,7 @@ source. A style reference does not establish specifications, effects or certific
 
 Reuse accessible references already supplied in the task. Inspect the full-page overview for
 sequence and rhythm, then enlarge relevant sections for composition, materials and typography;
-filenames alone are not evidence. For an explicitly requested preview, select only useful references or excerpts and identify their roles. For final-page generation, attach product material only and translate style decisions into written rules. Ask for missing files
+filenames alone are not evidence. For an explicitly requested preview, select only useful references or excerpts and identify their roles. For final-page generation, default to product and necessary model materials with style translated into text; selected mixed mode may add a matched reference fragment under reviewed-workflow.md. Ask for missing files
 only when the existing source cannot be accessed.
 
 For each useful reference, extract only decisions that can affect this page set:
@@ -104,7 +104,7 @@ An adopted copy change invalidates affected prompts and requires fit checking. A
 Write a compact task-specific prompt in this order:
 
 1. Current screen job and output format.
-2. Actual input-image roles: final pages use product-material references only; style references are analyzed during planning; attaching them is reserved for an explicitly requested preview or experiment.
+2. Actual ordered input-image roles: distinguish product, model identity and selected style/composition fragments. State what each reference contributes and what must not transfer.
 3. Main subject, camera distance, relative position and intended scale.
 4. Supporting modules, text hierarchy and space reserved for copy.
 5. Relevant lighting, material and style decisions.
@@ -194,7 +194,11 @@ approved work; do not restart a live task just to retroactively insert a new ste
 
 ## Independent content panels
 
-For standard final images, complete each content module inside its own frame. Use one shared type scale, consistent side margins, line height and letter spacing; verify these perceptually in generated images rather than claiming pixel-exact typography. A reference/master chapter divider is not a requirement to repeat top and bottom borders on every page. Whole-page review checks style and reading rhythm, not edge continuity. In the current independent-panel workflow, omit matching chevrons and cross-frame continuations; keep any explicitly requested and approved preview as planning evidence only. Translate the confirmed style into prompt text, not an attached image.
+For standard final images, complete each content module inside its own frame. Use one shared type scale, consistent side margins, line height and letter spacing; verify these perceptually in generated images rather than claiming pixel-exact typography. A reference/master chapter divider is not a requirement to repeat top and bottom borders on every page. Whole-page review checks style and reading rhythm, not edge continuity. In the current independent-panel workflow, omit matching chevrons and cross-frame continuations; keep any explicitly requested and approved preview as planning evidence only. Translate the confirmed style into prompt text; a selected mixed-mode reference may supplement this under the reviewed-reference contract.
+
+## Concrete planning checks
+
+Follow [reviewed-workflow.md](reviewed-workflow.md). A product photo is identity evidence, not an instruction to display a large package on every page. Record product_display and put both the approved visual_composition and display instruction into the prompt. Bind a specific reference fragment and visual goal to the relevant page; repeated general color notes do not establish that mapping. Resolve structural warnings with an actual revision or a reasoned keep decision.
 
 ## Copy-led shot choices
 

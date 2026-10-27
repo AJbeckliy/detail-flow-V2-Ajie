@@ -29,6 +29,10 @@ template is `references/review-editor.html` and is not opened directly without a
 - Reset asks before discarding edits. Leaving with edits triggers the browser's unload warning
   where supported. Browser download completion cannot be confirmed by this offline page.
 
+## Initial planning reminders
+
+The editor displays initial structural planning warnings (repetition, unsplit information and generic reference notes) separately from copy. These are original-plan reminders, not live design acceptance. After export, rerun planning_checks.py and resolve findings in the adopted plan. Do not suppress a still-present warning by claiming it was revised. See reviewed-workflow.md.
+
 ## Agent handoff: one authoritative copy
 
 When the user supplies an exported JSON, read `review_state`, inspect its diff against the

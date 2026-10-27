@@ -57,6 +57,7 @@ function addNote(page,x,y){const notes=page.review_annotations??=[];let i=1;whil
 function makeExport(plan,hash,overflow,overlaps){const value=clone(plan);value.review_state={source_plan_sha256:hash,status:'draft_needs_agent_review',generation_authorized:false,prompts_require_recompile:true,layout_changed:true,empty_page_ids:plan.pages.filter(p=>p.layout.blocks.length===0).map(p=>p.slice_id),browser_overflow_count:overflow,browser_overlap_count:overlaps,editor_version:2,exported_at:new Date().toISOString()};return value;}
 /* MODEL_END */
 const payload=JSON.parse(document.getElementById('data').textContent),original=payload.plan;
+if(payload.planning_warnings?.length){const box=document.createElement('details');box.id='planning-warnings';box.style.cssText='margin:16px 22px;padding:14px;background:#fff4df;color:#765026';const summary=document.createElement('summary');summary.textContent=`初始方案有 ${payload.planning_warnings.length} 项规划提醒；修改稿需重新复核`;box.append(summary);const list=document.createElement('ul');for(const issue of payload.planning_warnings){const item=document.createElement('li');item.textContent=`${issue.page==='all'?'整套':'第'+issue.page+'屏'}：${issue.message}`;list.append(item);}box.append(list);document.querySelector('header').after(box);}
 let plan=clone(original),dirty=false,fields=[],selection=null,activePage=0,noteMode=null,history=[],future=[];
 const $=id=>document.getElementById(id),grid=$('grid');
 function message(s,bad=false){$('status').textContent=s;$('status').className=bad?'error':'';}

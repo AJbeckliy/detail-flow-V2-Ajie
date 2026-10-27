@@ -3,7 +3,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageDraw
 
 
 def compose(manifest_path, output_dir, width=600):
@@ -55,10 +55,21 @@ def compose(manifest_path, output_dir, width=600):
             raise ValueError('Source changed during composition; rebuild from a stable revision')
     output_dir.mkdir(parents=True)
     target = output_dir/'vertical-preview.png'; board.save(target)
+    groups=[]
+    for offset in range(0,len(prepared),4):
+        subset=prepared[offset:offset+4];rows=(len(subset)+1)//2
+        cell_h=max(im.height for im in subset)+32
+        group=Image.new('RGB',(width*min(2,len(subset)),cell_h*rows),'white');draw=ImageDraw.Draw(group)
+        for j,im in enumerate(subset):
+            x=(j%2)*width;y=(j//2)*cell_h
+            draw.text((x+10,y+8),str(offset+j+1).zfill(2),fill='black')
+            group.paste(im,(x,y+32))
+        path=output_dir/f'group-{offset//4+1:02d}.png';group.save(path)
+        groups.append({'path':str(path.resolve()),'ids':[r['id'] for r in records[offset:offset+4]]})
     report = dict(status='needs_agent_visual_review', generation_authorized=False,
                   seam_repair=False, original_files_modified=False, width=width,height=total,
                   preview_path=str(target.resolve()), manifest_sha256=hashlib.sha256(raw).hexdigest(),
-                  images=records)
+                  images=records,review_groups=groups)
     (output_dir/'preview-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     return report
 

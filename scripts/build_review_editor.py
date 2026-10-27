@@ -50,6 +50,8 @@ def build_editor(source, output, font=None):
                 for b in page['blocks'] if b['type']=='annotation'} for page in pages]
     payload={'plan':portable,'backgrounds':backgrounds,'annotation_targets':targets,'visual_layers':visual_layers,
              'source_hash':hashlib.sha256(raw).hexdigest()}
+    from planning_checks import audit_plan as audit_design
+    payload['planning_warnings']=audit_design(portable)
     encoded=json.dumps(payload,ensure_ascii=False).replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
     template=(Path(__file__).resolve().parents[1]/'references/review-editor.html').read_text(encoding='utf-8')
     output.parent.mkdir(parents=True,exist_ok=True)

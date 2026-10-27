@@ -48,7 +48,7 @@ Example block:
 {"id":"headline","type":"text","copy_key":"headline","box":[0.08,0.12,0.84,0.18],"font_size":52}
 ```
 
-All leaf strings in `text_exact` must be placed once. The renderer does not shorten copy,
+All leaf strings in `text_exact` must be placed once. Numeric groups, step labels and table rows/cells should be separate semantic text blocks, not a page-sized body field. This uses the existing block schema; see reviewed-workflow.md. The renderer does not shorten copy,
 invent selling points, shrink fonts until they become unreadable, or silently discard text.
 An overflow requires a geometry revision or an explicitly approved copy change.
 
@@ -69,7 +69,7 @@ For ordered vertical inspection of existing sketch PNGs or generated originals, 
 `{"images":[{"id":"01","path":"page01.png"},{"id":"02","path":"page02.png"}]}`
 as a JSON file and run `python scripts/compose_ordered_preview.py ORDER.json NEW_OUTPUT`.
 Paths resolve beside that manifest and the supplied list order is preserved; IDs are not sorted.
-The preview is scaled for inspection, originals stay intact, and the report records hashes,
+The preview is scaled for inspection, originals stay intact, and groups of up to four pages are also saved for readable comparison. Still inspect each original and critical details. The report records hashes,
 dimensions and vertical positions. Its status requires Agent visual review, not automatic approval.
 
 ## Checks and status
@@ -121,7 +121,7 @@ to render. The receiving Agent's skill loading and Starcanvas connection are sep
 
 ### Generation handoff
 
-The Agent uses the reviewed plan to write screen-specific prompts. Final-page Starcanvas image inputs use product material only. Neither an optional approved preview nor the planning sketch is uploaded. Translate the approved geometry and content relationships into each page prompt, alongside shared written visual rules. If the user explicitly wants to test a layout
+The Agent uses the reviewed plan to write screen-specific prompts. Final-page inputs follow the declared product/model roles and optional selected mixed-reference policy. Neither an optional approved preview nor the planning sketch is uploaded. Translate the approved geometry and content relationships into each page prompt, alongside shared written visual rules. If the user explicitly wants to test a layout
 reference, label its role and forbid copying planning boxes/notes; inspect actual output for
 layout drift. No pixel-exact reproduction is promised.
 

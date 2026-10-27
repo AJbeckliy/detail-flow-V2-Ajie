@@ -2,7 +2,7 @@
 
 ## Current readiness
 
-The executor integrates Starcanvas 1.8.8 `canvas_prepare_run`. New tasks use `detail-flow-direct-v3`: plan/copy/layout approval -> complete final-page batch -> visual review, with no master or master-waiver field required. New final pages and requested previews use PT2.5-stable (`gpt-image-2.5-wd`), 1K and the confirmed ratio (default 9:16), profile `pt25-stable-sunburst-v4`. New previews attempt once with fallback disabled; do not switch to enterprise after a 503. Preserve older v2/v1 package semantics when inspecting or resuming; do not rewrite history.
+The executor integrates Starcanvas 1.8.8 `canvas_prepare_run`. New tasks use `detail-flow-direct-v4`: plan/copy/layout approval -> complete final-page batch -> visual review, with no master or master-waiver field required. New final pages and requested previews use PT2.5-stable (`gpt-image-2.5-wd`), 1K and the confirmed ratio (default 9:16), profile `pt25-stable-sunburst-v4`. New previews attempt once with fallback disabled; do not switch to enterprise after a 503. Preserve older v2/v1 package semantics when inspecting or resuming; do not rewrite history.
 
 The 2026-10-23 pet-harness run generated 16 no-master pages, with consistent overall style and several documented text/product defects. This supports the direct route for that case, not universal visual guarantees. The same day, a separately requested master successfully fell from a 503 at enterprise 2K to enterprise 1K/9:21; the third tier was not invoked.
 
@@ -13,6 +13,10 @@ The server returns one preparationId per workshop. For multiple nodeIds the exec
 ## Cached model options
 
 Use [model-settings.md](model-settings.md) and its JSON for known ratios. Do not repeat model/catalog/source inspection to rediscover them per page or repair. Keep a single normal availability check and actual execution-row readback. New stable compilations preserve a specified ratio; missing task ratios inherit the approved page/plan, then default to 9:16. New packages bind this with ratio_policy=confirmed-ratio-v1. Historical packages keep their recorded contract.
+
+## Reviewed product/reference contract
+
+New v4 tasks bind the current product_id to product_context in the approved plan, its asset inventory, language/count/ratio, page reference_images, product_display and visual_composition. Read [reviewed-workflow.md](reviewed-workflow.md). Text-only remains the default; selected mixed references are explicit and ordered. v2/v3 historical packages retain their existing rules.
 
 ## Agent responsibilities
 
@@ -44,6 +48,12 @@ python scripts/starcanvas_executor.py recollect RUN_DIR
 Polling is local script orchestration, not a new Agent turn per image. Default wait is 600 seconds with 5-second polls; timeout leaves durable state and does not cancel, restart or retry tasks. `resume` queries known tasks, recovers an unknown acknowledgement only with an unambiguous project/workshop/time binding, and can submit original never-submitted tasks within the recorded concurrency limit. It never resubmits previously attempted tasks.
 
 `collection_pending` means a reported result could not be read locally. `recollect RUN_DIR` retries local collection once per affected page using its saved task record, without a connection or generation request. It also rechecks historical `output_invalid` pages once; permanent identity/ratio errors remain rejected. `resume` includes this local recovery before polling. Use the selected child run reported by `status` when recollecting a fallback result. Recollection does not approve image quality.
+
+## Recovering preparation without generation
+
+Creation requests contain at most 80 operations and never split an individual page chain. Each batch saves an intent and a separate acknowledgement with its true idMap; completed mappings survive failures. Run the same `prepare PACKAGE.json RUN_DIR` to continue a new-version incomplete preparation. Confirmed batches are not recreated; an acknowledgement saved before a state-write crash is re-read and checked against actual nodes. A missing acknowledgement after commit remains unknown and blocks automatic recreation. Historical incomplete preparations without this protocol require inspection. No paid submission is issued by prepare.
+
+Configuration replacements are idempotent; saved completed steps are skipped. All page preparations and full readback must succeed before run --execute. Finishing preparation does not imply any visual review or generation approval.
 
 ## Review revision binding
 
@@ -105,9 +115,9 @@ State the initial generation count and any user-chosen repair allowance together
 
 Compiled repairs freeze `repair_authorization_version=1` and the record. Reports distinguish `generation_tasks_submitted` from delivery page count. Historical repair packages without this marker remain readable and locally collectible, but cannot issue new paid submissions; compile a newly authorized repair package instead. Do not retrofit approval into old frozen packages.
 
-## Final accounting
+## Final quantity summary
 
-After final visual review and file selection, follow [Delivery accounting](delivery-accounting.md). Per-run report.json includes provisional usage; final cumulative delivery-summary includes all initial/repair/preview runs and the final selected files. The user-facing summary includes actual star coins only when the complete total is verified; otherwise omit the cost line without a warning or placeholder.
+After final visual review and file selection, follow [Delivery counts](delivery-accounting.md). Per-run report.json includes provisional usage; final cumulative delivery-summary includes all initial/repair/preview runs and the final selected files. The summary contains image/task counts only; currency reporting and billing inputs are not part of this workflow.
 
 ## Evidence and completion
 

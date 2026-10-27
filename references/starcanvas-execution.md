@@ -2,7 +2,7 @@
 
 Use [the unified executor](unified-executor.md) for submission/wait/collection instead of an Agent-authored runner. It integrates unpaid preparation on Starcanvas 1.8.8; do not bypass preparation or readback checks.
 
-The Agent owns design and review; Starcanvas executes approved prompts. Normal order: editable plan/copy/layout approval -> all approved final pages submitted concurrently -> final vertical and individual review. No generated master or trial pair is required. New tasks use detail-flow-direct-v3. Seamless construction, edge anchors and seam repair remain paused. A visual master is not a long-scroll chapter or a crop source.
+The Agent owns design and review; Starcanvas executes approved prompts. Normal order: editable plan/copy/layout approval -> all approved final pages submitted concurrently -> final vertical and individual review. No generated master or trial pair is required. New tasks use detail-flow-direct-v4; frozen v2/v3 contracts are retained. Seamless construction, edge anchors and seam repair remain paused. A visual master is not a long-scroll chapter or a crop source.
 
 ## Input boundary
 
@@ -20,7 +20,7 @@ Read canvas://guide/workflow and workspace_get_context first. Latest unpaid prep
 
 Each task gets its own image/load-image-grid → ai-image/gpt-image → image/workshop chain. Loader output is imageGroup, generator image output is ai-image, workshop image input consumes it. Run the workshop via canvas_run_node, not the generator. The Agent imports actual saved files for inspection.
 
-Create an isolated project for initial production. For repairs, bind the original run and add new chains in that same project as specified in unified-executor.md; never overwrite original nodes. Do not apply a visual template merely to obtain nodes: template row parameters can carry a model/style preset. Master and final tasks use separate loaders/workshops by default. workflow_apply_patch dryRun then commit with current expectedRevision and idempotencyKey. Only the committed idMap maps client references to real nodes. Use canvas_attach_local_images for ordered references and the workshop save folder, first dryRun then commit. Read back every target. Run preflight for all scheduled workshops; severity=error stops submission.
+Create an isolated project for initial production. For repairs, bind the original run and add new chains in that same project as specified in unified-executor.md; never overwrite original nodes. Do not apply a visual template merely to obtain nodes: template row parameters can carry a model/style preset. Master and final tasks use separate loaders/workshops by default. workflow_apply_patch dryRun then commit with current expectedRevision and per-batch idempotencyKey; at most 80 operations, with complete page chains and durable acknowledgements. Preparation batches do not impose staged visual approval or serial generation. Only the committed idMap maps client references to real nodes. Use canvas_attach_local_images for ordered references and the workshop save folder, first dryRun then commit. Read back every target. Run preflight for all scheduled workshops; severity=error stops submission.
 
 ## Concurrency without changing planning
 
@@ -59,7 +59,7 @@ For the current schema, a workshop exposes one `rows[]` entry per task with `pro
 
 When the snapshot reveals a mismatch, correct only the observed layer through documented supported operations. Starcanvas 1.8.8 accepts generator `gptStyle` and `transparent`. Set these explicitly, then call `canvas_prepare_run`; do not send entire copied rows or assume partial row-array writes preserve bindings. Missing rows or unsupported required corrections block submission. Do not guess unrelated fields or enumerate styles. Replace loader inputs with the exact approved list (`replace:true`), then export and recheck once. Recheck after any input/prompt/parameter mutation. The readback is a snapshot, not a lock over future external edits; submit without further configuration mutations.
 
-For final pages, both loader images and workshop `rows[].images` must equal the task's product-reference paths in order. Extra long detail pages, style references, master images, sketches, duplicate copies and old-stage inputs must be removed before submission. Do not relabel those images as `product` to pass validation. Asset roles are determined from the user's sources during planning.
+For final pages, loader images and workshop rows[].images must equal the approved task references in exact order. Current v4 supports product/model roles in text_only mode and selected style/composition roles in mixed mode; see reviewed-workflow.md. Unrelated long references, generated masters, sketches, duplicates and stale inputs stay excluded. Never relabel a visual reference as product to pass validation.
 
 ## Durable submission and return
 
@@ -81,17 +81,17 @@ Normal user approval covers the plan/copy/layout; a preview gate exists only whe
 
 The transport script uses `master` and `slice` kinds. Normal stages are `production` -> optional `repair`; `master` is an explicitly requested preview branch only; `sample`/`remaining` remain only for historical inspection or an explicitly requested staged trial. New `master` and `slice` tasks use stable 1K and the confirmed ratio (9:16 by default). Historical untagged v1 packages remain readable for inspection; new untagged or master-v1 compilations require explicit `legacy_experiment: {evidence: "actual authorization and scope"}`. Omitting `workflow` alone is an error, not a fallback.
 
-For every new normal-flow manifest, set `workflow: "detail-flow-direct-v3"` and
+For every new normal-flow manifest, set `workflow: "detail-flow-direct-v4"` and
 `design_approval` to a concise reference to the actual plan approval or explicit delegation.
 Normal final-page tasks need no `visual_master`, `master_request` or `stage_policy.master` waiver. A generated preview uses `kind=master` only with actual user `master_request: {evidence}`. A retained preview request or explicit master gate on a later final-page manifest requires its `visual_master: {path, sha256, approval_evidence}`, unless the user explicitly waives that requested gate. Supplied bindings are still checked; do not carry optional request metadata into ordinary direct-production manifests.
-The first reference of each task is `role: "product"`. Final tasks contain only product-material references (`role: "product"`); never attach the master, style reference or layout sketch. The `visual_master` metadata binds approval evidence only and is not added to node inputs. Normal `production` contains the whole approved page set and does not require `sample_review`. New `sample`/`remaining` compilations require `staged_review_authority` pointing to the user's explicit request; the optional `remaining` stage additionally needs `sample_review`.
+The first reference of each task is `role: "product"`. Current v4 final tasks declare product/model roles and, in selected mixed mode, matched style/composition fragments. Never attach a generated master or a layout sketch as a substitute for planning. The `visual_master` metadata binds approval evidence only and is not added to node inputs. Normal `production` contains the whole approved page set and does not require `sample_review`. New `sample`/`remaining` compilations require `staged_review_authority` pointing to the user's explicit request; the optional `remaining` stage additionally needs `sample_review`.
 Repairs can contain final-page tasks without a master. A preview repair belongs to the explicitly requested preview branch. Any supplied optional master binding remains immutable until the corresponding revision is approved.
 
 These checks verify metadata and files, not human permission: never treat a fabricated string
 or `approved: true` as approval. The Agent must verify authority in the conversation and keep
 evidence in project records. An explicitly requested experimental deviation can use the legacy
 manifest contract with its scope stated in `authority` and `legacy_experiment.evidence`; do not silently drop the workflow tag
-to bypass a failed check. Use `examples/copy-led-workflow.json` for current task shapes. `detail-flow-master-v1` and its older example remain compatibility fixtures; do not select v1 or omit the workflow tag to bypass the current reference policy. Explicit A/B experiments may use the historical contract only with their authority and scope recorded in the explicit legacy field.
+to bypass a failed check. Use examples/reviewed-workflow.json for current task shapes; copy-led-workflow.json is historical compatibility material. `detail-flow-master-v1` and its older example remain compatibility fixtures; do not select v1 or omit the workflow tag to bypass the current reference policy. Use the current selected mixed-reference policy for A/B tests; legacy contracts are not a shortcut around current plan/reference binding.
 
 ## Planning-preview boundary
 
@@ -108,7 +108,7 @@ CLI `compile` resolves prompt paths, reference paths, master paths and frozen-pl
 
 Normal manifests keep `design_approval` and `approved_plan` approval evidence. `visual_master.approval_evidence` is used only for an explicitly chosen preview gate. Optional `stage_policy` entries for `design` or `master` have exactly `{mode, evidence}`: `approved` records actual user approval, `delegated` records explicit authority for Agent decision plus the completed internal review, and `waived` records the user's explicit waiver of that named stage. These strings bind records; they cannot establish permission by themselves.
 
-Skipping sketches does not waive design approval. Keep an executable brief with exact copy, confirmed count/ratio and product facts even if presentation is waived. `detail-flow-direct-v3` final pages do not need a master waiver. If the user explicitly requested and retained a preview gate, that request and any supplied approval/hash binding remain binding. Historical `detail-flow-copy-led-v2` packages keep their original master/waiver requirements; do not rewrite archived packages or invent a waiver to migrate them. Product-only inputs, full-set checks and generation authority remain required. A pause is never revoked by upgrading the skill.
+Skipping sketches does not waive design approval. Keep an executable brief with exact copy, confirmed count/ratio and product facts even if presentation is waived. Current direct-workflow final pages do not need a master waiver. If the user explicitly requested and retained a preview gate, that request and any supplied approval/hash binding remain binding. Historical `detail-flow-copy-led-v2` packages keep their original master/waiver requirements; do not rewrite archived packages or invent a waiver to migrate them. Declared role-bound references, full-set checks and generation authority remain required. A pause is never revoked by upgrading the skill.
 
 Example of a separately authorized design-stage delegation (illustrative, not authority):
 

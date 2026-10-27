@@ -1,5 +1,6 @@
 # detail-flow-V2-Ajie
 
+
 **给产品图和参考图，让 AI 帮你完成一整套电商详情页。**
 
 DetailFlow 是一个可以交给 Codex、WorkBuddy 等具备本地执行能力的 Agent 使用的 Skill。它负责拆解卖点、规划逐屏文案和画面，调用星幕画布出图，再检查、返修和整理交付。
@@ -39,6 +40,7 @@ DetailFlow 是一个可以交给 Codex、WorkBuddy 等具备本地执行能力�
 ## 它能帮你做什么
 
 - **看懂产品和参考**：分析商品外观、结构、颜色，以及参考图的配色、光线和排版。
+- **每个产品独立规划**：比例、语言、屏数和素材绑定本产品，避免串用上一产品参数。
 - **先把内容讲清楚**：安排每屏的任务、卖点、文案和画面，不把整套详情页做成重复海报。
 - **在审核页直接改稿**：编辑文字、调整文字框、添加批注，导出修改稿继续制作。
 - **整套批量出图**：方案确认后提交全部页面；默认 8 屏，也可以指定 10、12、16 屏等数量。
@@ -105,7 +107,7 @@ DetailFlow 是一个可以交给 Codex、WorkBuddy 等具备本地执行能力�
 | 出图模型 | PT2.5-稳定 |
 | 分辨率与比例 | 1K；默认 9:16，也可指定 16:9、1:1、4:5 等比例 |
 | 生成方式 | 确认方案后，整套批量提交 |
-| 参考输入 | 商品素材及必要的佩戴/使用素材；风格参考转成文字规则 |
+| 参考输入 | 产品与模特分角色；默认文字转译，也可选择匹配的风格/构图片段 |
 | 返修方式 | 原画布新增节点，保留之前的提示词和结果 |
 
 ## 文件说明
@@ -114,6 +116,7 @@ DetailFlow 是一个可以交给 Codex、WorkBuddy 等具备本地执行能力�
 - [references/installation.md](references/installation.md)：安装、升级和连接星幕画布。
 - [references/copy-review-editor.md](references/copy-review-editor.md)：可编辑文案与布局审核。
 - [references/unified-executor.md](references/unified-executor.md)：生成、恢复、原画布返修和追溯。
+- [references/reviewed-workflow.md](references/reviewed-workflow.md)：逐产品参数、参考角色、规划提醒与成图复核。
 - `scripts/`：可直接运行的编译、执行、预览、统计和回归检查脚本。
 - `examples/`：任务清单与布局示例。
 - `assets/examples/`：实际详情页案例图。

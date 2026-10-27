@@ -12,7 +12,7 @@ LOCKED_PROFILE = 'pt25-stable-sunburst-v4'
 ENTERPRISE_PROFILE = 'pt25-stage-sunburst-v3'
 LEGACY_PROFILE = 'pt25-1k-enterprise-v1'
 LOCKED_QUALITY = 'auto'
-PRODUCT_ONLY_WORKFLOWS = ('detail-flow-copy-led-v2', 'detail-flow-direct-v3')
+PRODUCT_ONLY_WORKFLOWS = ('detail-flow-copy-led-v2', 'detail-flow-direct-v3', 'detail-flow-direct-v4')
 
 
 def task_profile(task, profile=LOCKED_PROFILE):
@@ -62,7 +62,9 @@ def resolve_manifest(manifest, base_dir):
         return str((base / p).resolve() if not p.is_absolute() else p.resolve())
     for task in result.get('tasks', []):
         task['prompt_path'] = absolute(task['prompt_path'])
-        for ref in task.get('references', []): ref['path'] = absolute(ref['path'])
+        for ref in task.get('references', []):
+            ref['path'] = absolute(ref['path'])
+            if ref.get('source_path'):ref['source_path']=absolute(ref['source_path'])
     for anchor in result.get('frozen_planning', []): anchor['path'] = absolute(anchor['path'])
     if isinstance(result.get('visual_master'), dict) and result['visual_master'].get('path'):
         result['visual_master']['path'] = absolute(result['visual_master']['path'])
@@ -152,7 +154,7 @@ def validate_master_contract(manifest):
         refs = t.get('references', [])
         check(refs and refs[0].get('role') == 'product', 'First reference must be product authority')
     if kinds == {'master'}:
-        if workflow == 'detail-flow-direct-v3':
+        if workflow in ('detail-flow-direct-v3','detail-flow-direct-v4'):
             request=manifest.get('master_request')
             check(isinstance(request,dict) and evidence(request.get('evidence')),
                   'Optional visual preview requires explicit user master_request.evidence')
@@ -168,16 +170,16 @@ def validate_master_contract(manifest):
     if stage == 'remaining':
         check(evidence(manifest.get('sample_review')), 'First-page vertical review evidence required')
     master = manifest.get('visual_master')
-    if (workflow == 'detail-flow-direct-v3' and master is None
+    if (workflow in ('detail-flow-direct-v3','detail-flow-direct-v4') and master is None
             and 'master' not in manifest.get('stage_policy',{}) and 'master_request' not in manifest):
         for t in tasks:
-            check(all(r.get('role') == 'product' for r in t['references']), 'Final pages accept product references only')
+            check(workflow=='detail-flow-direct-v4' or all(r.get('role') == 'product' for r in t['references']), 'Final pages accept product references only')
         return
     mode = stage_authority(manifest, 'master', master.get('approval_evidence') if isinstance(master, dict) else None)
     if mode == 'waived' and master is None:
         check(workflow in PRODUCT_ONLY_WORKFLOWS, 'Master waiver requires the product-only workflow')
         for t in tasks:
-            check(all(r.get('role') == 'product' for r in t['references']), 'Final pages accept product references only')
+            check(workflow=='detail-flow-direct-v4' or all(r.get('role') == 'product' for r in t['references']), 'Final pages accept product references only')
         return
     check(isinstance(master, dict), 'Confirmed visual master binding required')
     path, digest = master.get('path'), master.get('sha256')
@@ -188,7 +190,7 @@ def validate_master_contract(manifest):
     if workflow in PRODUCT_ONLY_WORKFLOWS:
         # Approval metadata is retained; it is not an instruction to attach the master.
         for t in tasks:
-            check(all(r.get('role') == 'product' for r in t['references']),
+            check(workflow=='detail-flow-direct-v4' or all(r.get('role') == 'product' for r in t['references']),
                   'Copy-led final pages accept product references only; no master, style or sketch')
             for ref in t['references']:
                 check(path_key(ref['path']) != canonical
@@ -335,6 +337,18 @@ def validate(manifest, *, require_review_binding=True, require_repair_authorizat
     if manifest.get('workflow') in PRODUCT_ONLY_WORKFLOWS and (require_review_binding or 'review_binding_version' in manifest):
         check(manifest.get('review_binding_version',1)==1,'Unknown review binding version')
         validate_review_binding(manifest)
+    if manifest.get('workflow')=='detail-flow-direct-v4':
+        from reference_contract import validate_product,validate_references
+        from planning_checks import validate_plan,DISPLAY_TEXT
+        plan=read(manifest['approved_plan']['path'])
+        validate_product(manifest,plan);validate_plan(plan);validate_references(manifest)
+        pages={p['slice_id']:p for p in plan['pages']}
+        for task in tasks:
+            if task['kind']!='slice':continue
+            page=pages[task.get('page_id',task['id'].removeprefix('screen-'))]
+            prompt=Path(task['prompt_path']).read_text(encoding='utf-8').replace('\r\n','\n')
+            check(page['visual_composition'].replace('\r\n','\n') in prompt,'Approved visual_composition missing from prompt')
+            check(DISPLAY_TEXT[page['product_display']] in prompt,'Approved product-display instruction missing from prompt')
     return {'ready':True,'tasks':len(tasks),'prompt_transport':'unchanged'}
 
 
@@ -358,7 +372,7 @@ def compile_tasks(manifest, output, base_dir=None, *, reuse_preparation=False, r
     for index,t in enumerate(manifest['tasks']):
         prompt=Path(t['prompt_path']).read_bytes().decode('utf-8')
         key=t['id'];load=key+'-load';gen=key+'-gen';workshop=key+'-workshop'
-        inputs=[dict(ref,sha256=sha(ref['path'])) for ref in t['references']]
+        inputs=[dict(ref,sha256=sha(ref['path']),**({'source_sha256':sha(ref['source_path'])} if ref.get('source_path') else {})) for ref in t['references']]
         task=dict(t,prompt_sha256=sha(t['prompt_path']),references=inputs,load_ref=load,gen_ref=gen,workshop_ref=workshop,output_dir=str((dest/key).resolve()))
         if manifest.get('workflow') in PRODUCT_ONLY_WORKFLOWS:
             task.update(gpt_style='sunburst',transparent=False,workshop_settings=dict(task_profile(t,manifest.get('execution_profile',LOCKED_PROFILE)),aspectRatio=t['aspect_ratio']))
@@ -407,7 +421,7 @@ def compile_tasks(manifest, output, base_dir=None, *, reuse_preparation=False, r
         package['reference_attachments']=[
             {'load_ref':task['load_ref'],'arguments':{'kind':'image','paths':[r['path'] for r in task['references']],'replace':True}}
             for task in tasks]
-    for field in ('workflow', 'design_approval', 'visual_master', 'master_request', 'sample_review', 'staged_review_authority', 'stage_policy', 'legacy_experiment', 'completed_dependencies', 'review_delivery', 'ratio_policy'):
+    for field in ('workflow', 'design_approval', 'visual_master', 'master_request', 'sample_review', 'staged_review_authority', 'stage_policy', 'legacy_experiment', 'completed_dependencies', 'review_delivery', 'ratio_policy', 'product_id', 'reference_policy'):
         if field in manifest: package[field] = manifest[field]
     if dest.exists():
         entries={p.name for p in dest.iterdir()}
@@ -512,6 +526,11 @@ def readback_export(package_path, snapshot_path, id_map_path, output):
 def assert_readback(package, readbacks):
     validate_master_contract(package)
     if 'review_delivery' in package: validate_review_delivery(package)
+    if package.get('workflow')=='detail-flow-direct-v4':
+        from reference_contract import validate_references
+        binding=package['approved_plan']
+        check(sha(binding['path'])==binding['sha256'],'Approved plan changed')
+        validate_references(package)
     assert_effective_workshops(package,readbacks)
     generators=readbacks.get('generators',{})
     references=readbacks.get('references',{})
