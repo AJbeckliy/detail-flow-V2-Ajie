@@ -1,9 +1,9 @@
 {
   "version": 1,
   "revision": "2026.11.14-api-v1",
-  "content_sha256": "1067dfa9d241ea2bb1f671cb063aa6cb45b8d80fa9545fd4a0fff3992812d7ab",
+  "content_sha256": "48272635b7951c26027861c806385760dc356dc1972bf6e044b1546c68ccf402",
   "files": {
-    "README.md": "93a02b159c49c46dace5a139cd21127ec07196b19dcd2cf195bc9fad3e017d69",
+    "README.md": "359323d57f31675796193aec23300b238fb706d6003fa25a48bed3942bb12d6b",
     "SKILL.md": "c1246aa96ff6940d95e6049c658001d29057ccf262d0e9c6b870ff5fdf97e2e9",
     "agents/openai.yaml": "47235dec8b5d89d1b05ecefe78f39d08b0abae361ff0658693c6a9535ddfc540",
     "assets/examples/mens-underwear-full.png": "038edd80dbf07668ea41faa09151486357b7bb77204e8fcd52f699727834bcc7",
