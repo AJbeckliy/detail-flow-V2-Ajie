@@ -1,5 +1,10 @@
 # Local validation and another Agent
 
+## Select the backend first
+
+Before any setup, follow [backend selection](backend-selection.md). Shared requirements are Python, Pillow, local files, image inspection and editable HTML delivery. API mode uses [API execution](api-execution.md) and never runs Starcanvas setup/doctor. All bridge, app-startup, MCP and same-filesystem-with-Starcanvas requirements below are Starcanvas-only. Installation without a chosen route stops after shared files/dependencies, not a default Starcanvas connection.
+
+
 The planning/copy/review layer is ordinary Skill content. The configured image executor is Starcanvas, whose model profile, tool mapping and transport schema are isolated in `starcanvas-execution.md`. The bundled executor implements Starcanvas. Prefer that route for pages, supplemental assets and repairs. Other host tools remain available; if used, identify the actual backend and do not fabricate Starcanvas execution records.
 
 ## Capabilities

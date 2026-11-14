@@ -1,5 +1,10 @@
 # Agent-operated installation and readiness
 
+## Select the backend first
+
+Before any setup, follow [backend selection](backend-selection.md). Shared requirements are Python, Pillow, local files, image inspection and editable HTML delivery. API mode uses [API execution](api-execution.md) and never runs Starcanvas setup/doctor. All bridge, app-startup, MCP and same-filesystem-with-Starcanvas requirements below are Starcanvas-only. Installation without a chosen route stops after shared files/dependencies, not a default Starcanvas connection.
+
+
 When asked to install/configure this Skill and MCP, complete setup before entering production. Do not hand the user a developer test checklist. Reuse existing approvals for routine local installation. Do not run image generation during installation. Do not create or open sample review HTML, call prepare_review.py, launch a browser or run browser/full regression suites as an installation step. Check dependencies, installed files and the read-only live doctor only. Installation-only requests end at readiness; continue into planning only when the user also requested production. Editable review remains part of actual production, not installation.
 
 ## One short setup route
